@@ -9,231 +9,436 @@ rel="stylesheet" type="text/css"/>
 rel="stylesheet" type="text/css"/>
 <link href="https://sandbox.ntp.niehs.nih.gov/static/css/ntpweb.css"
 rel="stylesheet" type="text/css"/> 
-<link href="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/css/theme.css" rel="stylesheet">
+<link href="{% static 'chemmaps/css/theme.css' %}" rel="stylesheet">
 {% endblock %}
-
 {% block content %}
-<div id = "bg">
-    {% include 'chemmaps/includes/navbar.html' %}
+<style>
 
-        <h1>Navigation</h1>
-        <p>
-            Inspired by popular navigation tools such as Google Maps
-            , users have different options accessible from the main
-            panel<br>
-            (A) A dedicated search bar allowing users to
-            rapidly identify a specific drug based on its
-            chemical name, ID, or generic name; <br>
-            (B) A description
-            panel including chemical properties such as logP or
-            molecular weight and the actual chemical structure of
-            the selected molecule. This panel also includes options
-            to extract and/or connect up to twenty most similar
-            molecules in that space; <br>
-            (C) A visualization panel including options to choose
-            which types of drugs are displayed (e.g., approved,
-            withdrawn, in development), and options to setup the
-            color of compounds based on chemical properties
-            (e.g., molecular weight, logP).
-            <br><br>
+    
+    /* For two columns in the help page*/
 
-            <br>
-            <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/methods.png" style="width: 80%" class="marginauto">
+    .columnhelp {
+        float: left;
+        padding: 10px;
+        min-width: 600px;
+      }
+
+      .left {
+        width: 50%;
+      }
+      
+      .right {
+        width: 50%;
+      }
+
+    .rowhelp{
+        width: 100%;
+        margin: 0px;
+    }
+    
+    .rowhelp:after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+
+    /* Float four columns side by side */
+    .columnCard {
+        float: center;
+        width: 25%;
+    }
+
+    .columnIcon {
+        float: center;
+        padding: 0 10px;
+        width: auto;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        margin: 0;
+    }
+
+    /* Clear floats after the columns */
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
 
 
-        <div class="row">
-            <div class="column">
+    .card-custom {
+        max-width: 400px;
+        min-width: 200px;
+        margin: 0 auto;
+    }
 
-                <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/stargreen.png" style="opacity: 1" alttext="Green star for approved drug">
-                <div class="desc">Approved drug</div>
-            </div>
-            <div class="column">
-                <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/starviolet.png" alttext="Violet star for withdrawn drug" style="opacity: 1">
-                <div class="desc">Approved drug</div>
-            </div>
-            <div class="column">
-                <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/planet.png" alttext="Planet for drug in development" style="opacity: 1">
-                <div class="desc">Investigational drug</div>
+
+    /* Style for the slideshow */
+
+    * {box-sizing: border-box}
+    body {font-family: Verdana, sans-serif; margin:0}
+    .mySlides1, .mySlides2, .mySlides3, .mySlides4 {display: none}
+    img {vertical-align: middle;}
+
+    /* Slideshow container */
+    .slideshow-container {
+    max-width: 1000px;
+    position: relative;
+    margin: auto;
+    }
+
+    /* Next & previous buttons */
+    .prev, .next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    padding: 16px;
+    margin-top: -22px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.6s ease;
+    border-radius: 0 3px 3px 0;
+    user-select: none;
+    }
+
+    /* Position the "next button" to the right */
+    .next {
+    right: 0;
+    border-radius: 3px 0 0 3px;
+    }
+    
+    .prev {
+    left: 0;
+    }
+
+
+    /* On hover, add a black background color with a little bit see-through */
+    .prev:hover, .next:hover {
+    background-color: rgba(0,0,0,0.8);
+    }
+
+    /* Caption text */
+    .text {
+    color: #f2f2f2;
+    font-size: 15px;
+    padding: 8px 12px;
+    position: absolute;
+    bottom: 8px;
+    width: 100%;
+    text-align: center;
+    }
+
+    /* Number text (1/3 etc) */
+    .numbertext {
+    color: #f2f2f2;
+    font-size: 12px;
+    padding: 8px 12px;
+    position: absolute;
+    top: 0;
+    }
+
+
+    /* On smaller screens, decrease text size */
+    @media only screen and (max-width: 300px) {
+    .prev, .next,.text {font-size: 11px}
+    }
+
+</style>
+
+
+<div role="navigation"> {% include 'chemmaps/includes/navbar.html' %}</div>
+
+
+<div class="container-fluid bgindex padding-left: 0px padding-right: 0px">
+    <br><br>
+    <div class="rowhelp">
+        <div class="columnhelp right">
+            <h3 align="left">The interactive maps</h3>
+            <p align="left">ChemMaps.com is a cheminformatics-powered webserver aiming at facilitating visual browsing and inspection of a given chemical space. 
+            The first version was developed in collaboration between the North Carolina State University (NCSU) and the National Institute of Environmental Health Sciences (NIEHS). 
+            In the second version a particular emphasize has been given to the environmental chemical space. 
+            ChemMaps.com includes four customizable 3D maps.</p>
+        </div>
+        <div class="columnhelp left">
+            <div class="slideshow-container">
+                <div class="mySlides1 align:center">
+                  <div class="numbertext">1 / 4</div>
+                  <img src="{% static 'chemmaps/img/Slide1.PNG' %}" style="width:100%">
+                </div>
+                <div class="mySlides1">
+                  <div class="numbertext">2 / 4</div>
+                  <img src="{% static 'chemmaps/img/Slide2.PNG' %}" style="width:100%">
+                </div>
+                <div class="mySlides1">
+                  <div class="numbertext">3 / 4</div>
+                  <img src="{% static 'chemmaps/img/Slide3.PNG' %}" style="width:100%">
+                </div>
+                <div class="mySlides1">
+                    <div class="numbertext">4 / 4</div>
+                    <img src="{% static 'chemmaps/img/Slide4.PNG' %}" style="width:100%">
+                </div>
+                <a class="prev" onclick="plusSlides(-1, 0)">&#10094;</a>
+                <a class="next" onclick="plusSlides(1, 0)">&#10095;</a>
+                </div>
+                <br>
             </div>
         </div>
-
-
-        <h2>Material</h2>
-        <p style="font-size: 2vmin">
-            DrugMap is solely focusing on the chemical space
-            defined by all drugs from the DrugBank database
-            with 8,752 compounds (release dated 2017-12-20).
-            Only small molecules were considered as peptides
-            and non-organic compounds were removed.
-            <br><br>
-            <a href="https://www.drugbank.ca/">
-                <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/DrugBank.png" style="width: 60%" class="marginauto">
-            </a>
-        </p>
-        <br>
-
-        <h2>Methods</h2>
-        <p style="font-size: 2vmin">
-            ChemMaps uses a compendium of 1D, 2D and 3D pre-computed
-            molecular descriptors to generate the drug space in
-            three dimensions. The first two dimensions were defined
-            using a principal component analysis from a set of 648
-            1D/2D RDKit descriptors computed using the Python
-            library PyDPI. Only informative descriptors
-            (i.e., no null variance, no correlated descriptors with
-            pairwise R> 0.8) are conserved. The third dimension was
-            computed using 432 3D PADEL descriptors filtered using
-            the same protocol. Importantly, 3D chemical structures
-            were generated from SMILES strings using Ligprep from
-            the Schrödinger software suite (release 2017.3), with
-            only the most stable conformation conserved for each
-            chemical. <br>
-            Drugs’ first and second coordinates were computed from
-            116 1D and 2D descriptors, representing 14.0% (X-axis)
-            and 8.7% (Y-axis) of the overall variance in the
-            descriptor space. The third coordinate was computed
-            from 70 3D descriptors defining 26.0% of descriptor
-            variability.
-            <br><br>
-
-            <a class="btnghost" href="https://pypi.python.org/pypi/pydpi/1.0" target="_blank">
-                <i class="fa fa-external-link">
-                    pydpi 1.0
-                </i>
-            </a>
-        </p>
-
-        <p style="font-size: 2vmin">
-            ChemMaps.com was developed in JavaScript using the
-            Three.js library, which allows for an interactive,
-            mouse-based, easy-to-use navigation in any
-            internet browser.
-            <br><br>
-            <a class="btnghost" href="https://threejs.org/" target="_blank">
-                <i class="fa fa-external-link">
-                    Three.js
-                </i>
-            </a>
-        </p>
-        <br><br>
-
-
-
-        <div class="row">
-            <div class="column">
-                <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/starGHS1.png" style="opacity: 1">
-                <div class="desc">GHS = 1</div>
-            </div>
-            <div class="column">
-                <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/starGHS2.png"  style="opacity: 1">
-                <div class="desc">GHS = 2</div>
-            </div>
-            <div class="column">
-                <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/starGHS3.png"  style="opacity: 1">
-                <div class="desc">GHS = 3</div>
-            </div>
-            <div class="column">
-                <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/starGHS4.png"  style="opacity: 1">
-                <div class="desc">GHS = 4</div>
-            </div>
-            <div class="column">
-                <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/starGHS5.png"  style="opacity: 1">
-                <div class="desc">GHS = 5</div>
-            </div>
-        </div>
-
-
-        <div class="row">
-            <div class="column">
-                <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/starEPA1.png" style="opacity: 1">
-                <div class="desc">EPA = 1</div>
-            </div>
-            <div class="column">
-                <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/starEPA2.png"  style="opacity: 1">
-                <div class="desc">EPA = 2</div>
-            </div>
-            <div class="column">
-                <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/starEPA3.png"  style="opacity: 1">
-                <div class="desc">EPA = 3</div>
-            </div>
-            <div class="column">
-                <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/starEPA4.png"  style="opacity: 1">
-                <div class="desc">EPA = 4</div>
-            </div>
-        </div>
-
-        <br><br>
-
-        <div class="row">
-            <div class="column">
-                <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/star.png" style="opacity: 1">
-                <div class="desc">No tox information</div>
-            </div>
-            <div class="column">
-                <img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/starred.png"  style="opacity: 1">
-                <div class="desc">Selected Chemical</div>
-            </div>
-        </div>
-
-        <br>
-
-        <h2>Material</h2>
-        <p style="font-size: 2vmin">
-            DSSTOxMap is solely focusing on the chemical space
-            defined by all chemicals from the EPA DSSTox library
-            with ~700,000 compounds (release dated 01-2019).
-            <br><br>
-            <a href="https://comptox.epa.gov/dashboard/"><img src="https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/EPA-dashboard.png" class="marginauto"></a>
-        </p>
-        <p><br></p>
-
-
-
-        <h2>Methods</h2>
-        <p style="font-size: 2vmin">
-            ChemMaps uses a compendium of 1D, 2D and 3D pre-computed
-            molecular descriptors to generate the environmental chemicals
-            space in three dimensions. The first two dimensions were defined
-            using a principal component analysis from a set of 648
-            1D/2D RDKit descriptors computed using the Python
-            library PyDPI. Only informative descriptors
-            (i.e., no null variance, no correlated descriptors with
-            pairwise R> 0.8) are conserved. The third dimension was
-            computed using 502 3D descriptors filtered using
-            the same protocol. Importantly, 3D chemical structures
-            were generated from SMILES strings using MMFF94 force field.
-            <br>
-            Chemicals' first and second coordinates were computed from
-            138 1D and 2D descriptors, representing 13.1% (X-axis)
-            and 9.19% (Y-axis) of the overall variance in the
-            descriptor space. The third coordinate was computed
-            from 78 3D descriptors defining 23.6% of descriptor
-            variability.<br>
-            <br>
-
-            <a class="btnghost" href="https://pypi.python.org/pypi/pydpi/1.0" target="_blank">
-                <i class="fa fa-external-link">
-                    pydpi 1.0
-                </i>
-            </a>
-        </p>
-
-        <p style="font-size: 2vmin">
-            ChemMaps.com was developed in JavaScript using the
-            Three.js library, which allows for an interactive,
-            mouse-based, easy-to-use navigation in any
-            internet browser.
-            <br><br>
-            <a class="btnghost" href="https://threejs.org/" target="_blank">
-                <i class="fa fa-external-link">
-                    Three.js
-                </i>
-
-            </a>
-            <br><br>
-
+    </div>
     <br><br>
 </div>
+
+<div class="container-fluid padding-left: 0px padding-right: 0px">
+    <br><br>
+    <div class="rowhelp">
+        <div class="columnhelp left">
+            <div class="slideshow-container">
+                <div class="mySlides2 align:center">
+                  <div class="numbertext" style="color:black">1 / 4</div>
+                  <img src="{% static 'chemmaps/img/Slide5.PNG' %}" style="width:100%">
+                </div>
+                <div class="mySlides2">
+                  <div class="numbertext" style="color:black">2 / 4</div>
+                  <img src="{% static 'chemmaps/img/Slide6.PNG' %}" style="width:100%">
+                </div>
+                <div class="mySlides2">
+                  <div class="numbertext" style="color:black">3 / 4</div>
+                  <img src="{% static 'chemmaps/img/Slide7.PNG' %}" style="width:100%">
+                </div>
+                <div class="mySlides2">
+                    <div class="numbertext" style="color:black">4 / 4</div>
+                    <img src="{% static 'chemmaps/img/Slide8.PNG' %}" style="width:100%">
+                </div>
+                <a class="prev" onclick="plusSlides(-1, 1)" style="color:black">&#10094;</a>
+                <a class="next" onclick="plusSlides(1, 1)" style="color:black">&#10095;</a>
+            </div>
+            <br>
+        </div>
+        
+        <div class="columnhelp right">
+            <h3 align="left" style="color:black">An intuitive navigation</h3>
+            <p align="left">Inspired by popular navigation tools such as Google Maps, 
+                ChemMaps.com includes a large set of 3D navigation tools including a search bar, 
+                an interactive chemicals description panel and a controller panel that allows to choose chemicals representation, 
+                color range and chemical properties on the map.</p>
+        </div>
+    </div>
+    <br><br>
+</div>
+
+
+<div class="container-fluid bgindex padding-left: 0px padding-right: 0px">
+    <br><br>
+    <div class="rowhelp">
+        <div class="columnhelp right">
+            <h3 align="left">A personalized map</h3>
+            <p align="left">A user can personalize each map with up to five precomputed chemicals properties. 
+                Chemicals on the map will be represented using their properties that user can interactively change. 
+                A user is allowed to project on a map their own chemicals. ChemMaps.com can compute on the fly coordinates of each new chemical. 
+                All results are downloadable including 2D and 3D molecular descriptors computed on the fly.</p>
+        </div>
+        <div class="columnhelp left">
+            <div class="slideshow-container">
+                <div class="mySlides3 align:center">
+                  <div class="numbertext">1 / 5</div>
+                  <img src="{% static 'chemmaps/img/Slide9.PNG' %}" style="width:100%">
+                </div>
+                <div class="mySlides3">
+                  <div class="numbertext">2 / 5</div>
+                  <img src="{% static 'chemmaps/img/Slide10.PNG' %}" style="width:100%">
+                </div>
+                <div class="mySlides3">
+                  <div class="numbertext">3 / 5</div>
+                  <img src="{% static 'chemmaps/img/Slide11.PNG' %}" style="width:100%">
+                </div>
+                <div class="mySlides3">
+                    <div class="numbertext">4 / 5</div>
+                    <img src="{% static 'chemmaps/img/Slide12.PNG' %}" style="width:100%">
+                </div>
+                <div class="mySlides3">
+                    <div class="numbertext">5 / 5</div>
+                    <img src="{% static 'chemmaps/img/Slide13.PNG' %}" style="width:100%">
+                </div>
+                <a class="prev" onclick="plusSlides(-1, 2)">&#10094;</a>
+                <a class="next" onclick="plusSlides(1, 2)">&#10095;</a>
+            </div>
+                <br>
+            </div>
+        </div>
+    </div>
+    <br><br>
+</div>
+
+
+<div class="container-fluid padding-left: 0px padding-right: 0px">
+    <br><br>
+    <div class="rowhelp">
+        <div class="columnhelp left">
+            <div class="slideshow-container">
+                <div class="mySlides4 align:center">
+                  <div class="numbertext" style="color:black">1 / 4</div>
+                  <img src="{% static 'chemmaps/img/Slide14.PNG' %}" style="width:100%">
+                </div>
+                <div class="mySlides4">
+                  <div class="numbertext" style="color:black">2 / 4</div>
+                  <img src="{% static 'chemmaps/img/Slide15.PNG' %}" style="width:100%">
+                </div>
+                <div class="mySlides4">
+                  <div class="numbertext" style="color:black">3 / 4</div>
+                  <img src="{% static 'chemmaps/img/Slide16.PNG' %}" style="width:100%">
+                </div>
+                <div class="mySlides4">
+                    <div class="numbertext" style="color:black">4 / 4</div>
+                    <img src="{% static 'chemmaps/img/Slide17.PNG' %}" style="width:100%">
+                </div>
+                <a class="prev" onclick="plusSlides(-1, 3)" style="color:black">&#10094;</a>
+                <a class="next" onclick="plusSlides(1, 3)"style="color:black">&#10095;</a>
+            </div>
+            <br>
+            </div>
+        
+        <div class="columnhelp right">
+            <h3 align="left" style="color:black">Navigate in the environmental universe</h3>
+            <p align="left">The Tox21 and ToxCast assay results are loaded in ChemMaps.com. 
+                Users can project on the Tox21Map the AC50 of each chemical by assays. 
+                A mapping of each assay is realized on gene target. Users can decide to project on the map results of several assays that mapped one target. 
+                A summary table is available and gives for each chemical the lowest AC50, 
+                the number of assays where the chemicals is found active as well as the assay with the lowest AC50.</p>
+        </div>
+    </div>
+    </div>
+    <br><br>
+</div>
+
+
+<div class="container-fluid bgindex text-center padding-left: 0px">
+    <br>
+</div>
+
+<div class="container padding: 0px">
+    <div class="row">
+        <div class="columnIcon">
+            <div class="card-custom">
+                <div class="card-body text-center">
+                    <br>
+                    <a href="https://www.djangoproject.com/">
+                        <img src="{% static 'chemmaps/img/django_python.png' %}" style="width:100px" alt="Logo python django">
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="columnIcon">
+            <div class="card-custom">
+                <div class="card-body text-center">
+                    <br>
+                    <a href="https://www.r-project.org/">
+                        <img src="{% static 'chemmaps/img/R_logo.png' %}" style="width:100px" alt="Logo R project">
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="columnIcon">
+            <div class="card-custom">
+                <div class="card-body text-center">
+                    <br>
+                    <a href="https://www.javascript.com/">
+                        <img src="{% static 'chemmaps/img/js_logo.png' %}" style="width:100px" alt="Logo JS">
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="columnIcon">
+            <div class="card-custom">
+                <div class="card-body text-center">
+                    <br><br>
+                    <a href="https://threejs.org/">
+                        <img src="{% static 'chemmaps/img/three_JS_logo.png' %}" style="width:150px" alt="Logo Three.JS">
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="columnIcon">
+            <div class="card-custom">
+                <div class="card-body text-center">
+                    <br>
+                    <a href="https://www.rdkit.org/">
+                        <img src="{% static 'chemmaps/img/rdkit_logo.png' %}" style="width:100px" alt="Logo RDKit project">
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="columnIcon">
+            <div class="card-custom">
+                <div class="card-body text-center">
+                    <br>
+                    <a href="https://github.com/kmansouri/OPERA">
+                        <img src="{% static 'chemmaps/img/OPERA_logo.png' %}" style="width:150px" alt="Logo OPERA">
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="columnIcon">
+            <div class="card-custom">
+                <div class="card-body text-center">
+                    <br>
+                    <a href="https://comptox.epa.gov/dashboard">
+                        <img src="{% static 'chemmaps/img/EPA_dashboard_logo.png' %}" style="width:100px" alt="Logo EPA chemical dashboard">
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="columnIcon">
+            <div class="card-custom">
+                <div class="card-body text-center">
+                    <br>
+                    <a href="https://go.drugbank.com/">
+                        <img src="{% static 'chemmaps/img/drugbank_logo.png' %}" style="width:100px" alt="Logo DrugBank">
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    <br>
+
+</div>
+
+
+<script>
+    let slideIndex = [1,1,1,1];
+    let slideId = ["mySlides1", "mySlides2", "mySlides3", "mySlides4"]
+    showSlides(1, 0);
+    showSlides(1, 1);
+    showSlides(1, 2);
+    showSlides(1, 3);
+    
+    function plusSlides(n, no) {
+      showSlides(slideIndex[no] += n, no);
+    }
+    
+    function showSlides(n, no) {
+      let i;
+      let x = document.getElementsByClassName(slideId[no]);
+      if (n > x.length) {slideIndex[no] = 1}    
+      if (n < 1) {slideIndex[no] = x.length}
+      for (i = 0; i < x.length; i++) {
+         x[i].style.display = "none";  
+      }
+      x[slideIndex[no]-1].style.display = "block";  
+    }
+</script>
 
 
 {% endblock content %}

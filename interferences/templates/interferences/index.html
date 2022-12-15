@@ -1,23 +1,22 @@
 {% extends "base.html" %}
+{% load static %}
 {% block extra-css %}
 <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css">
 <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-<link href="https://sandbox.ntp.niehs.nih.gov/static/css/ntpweb-shared.css"
-rel="stylesheet" type="text/css"/> 
-<link href="https://sandbox.ntp.niehs.nih.gov/static/css/base.css"
-rel="stylesheet" type="text/css"/>
-<link href="https://sandbox.ntp.niehs.nih.gov/static/css/ntpweb.css"
-rel="stylesheet" type="text/css"/>
-<link href="https://sandbox.ntp.niehs.nih.gov/interferences/static/css/theme.css" rel="stylesheet">
-<link href="https://sandbox.ntp.niehs.nih.gov/interferences/static/css/table.css" rel="stylesheet">
-{% endblock %}
+<link href="https://sandbox.ntp.niehs.nih.gov/static/css/ntpweb-shared.css" rel="stylesheet" type="text/css"/> 
+<link href="https://sandbox.ntp.niehs.nih.gov/static/css/base.css" rel="stylesheet" type="text/css"/>
+<link href="https://sandbox.ntp.niehs.nih.gov/static/css/ntpweb.css" rel="stylesheet" type="text/css"/>
 
+<link href="{% static 'interferences/css/theme.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'interferences/css/table.css' %}" rel="stylesheet" type="text/css"/>
+
+{% endblock %}
 {% block title %}Interference prediction{% endblock %}
 {% block content %}
 
 {% include 'interferences/includes/navbar.html' %}
 
-<h1>Prediction of Chemical-Assay Interference</h1>
+<h1>InterPred: Prediction of Chemical-Assay Interference</h1>
 <p>
 This work represents one of the largest screening efforts to date specifically intended to identify and characterize 
 chemical-assay interference via luciferase inhibition and autofluorescence, and to interrogate the influence of cell 
@@ -26,16 +25,20 @@ The resulting predictive models can be used to predict interference potential of
 insight into structural features that may influence activity and inform molecular design and assay selection.
 </p>
 
+<h2>Please cite</h2>
 <p style="text-align:  center; font-size: 25px">
-    Please cite: <a href="" style="color: #31BE04">
-        Alexandre Borrel et al.; High-Throughput Screening to Predict Chemical-Assay Interference </a><br>
-    (submitted)
+    Research publication: <a href="https://www.nature.com/articles/s41598-020-60747-3" style="color: rgb(32, 107, 7)">
+        High-Throughput Screening to Predict Chemical-Assay Interference, <i>Scientific Reports</i></a><br>
+    Webserver publication: <a href="https://doi.org/10.1093/nar/gkaa378" style="color: rgb(32, 107, 7)">
+            InterPred: a webtool to predict chemical autofluorescence and luminescence interference, <i>NAR webserver</i></a>
 </p>
+
+<p>* This website is free and open to all users and there is no login requirement.</p>
 
 <h2> Dataset</h2>
 <p>Three assay platforms were applied to analyze luciferase and fluorescence 
 interference patterns using the Tox21 chemical screening library. <br>
-The raw data are freely available on the <a href="https://tripod.nih.gov/tox21/assays/">NCATS Tox21 browser:</a>
+The raw data are freely available on the <a class = "aurl" href="https://tripod.nih.gov/tox21/assays/">NCATS Tox21 browser:</a>
 <ul style="margin-left:40px">
 
     <li>“tox21-luc-biochem-p1” for the luciferase inhibition assay</li>
@@ -47,13 +50,13 @@ The raw data are freely available on the <a href="https://tripod.nih.gov/tox21/a
 </p>
 
 <h2>Sources</h2>
-<p>All code to calculate the descriptors, build and run QSAR models, and perform analyses detailed in Borrel et al. can be found on github: <a href="https://github.com/ABorrel/interferences">Source</a> </p>
+<p>All code to calculate the descriptors, build and run QSAR models, and perform analyses detailed in Borrel et al. can be found on github: <a class = "aurl" href="https://github.com/ABorrel/interferences">Source</a> </p>
 
 <h2>QSAR modeling</h2>
 <p>
 
     The QSAR modeling workflow was conducted according to the best practices 
-    (<a href="http://www.eurekaselect.com/66013/article">Tropsha and Golbraikh, 2007</a>; <a href="https://pubs.acs.org/doi/10.1021/jm4004285">Cherkasov et al., 2014</a>; <a href="https://pubs.acs.org/doi/10.1021/ci400572x">Golbraikh et al., 2014</a>). 
+    (<a class = "aurl" href="http://www.eurekaselect.com/66013/article">Tropsha and Golbraikh, 2007</a>; <a class = "aurl" href="https://pubs.acs.org/doi/10.1021/jm4004285">Cherkasov et al., 2014</a>; <a class = "aurl" href="https://pubs.acs.org/doi/10.1021/ci400572x">Golbraikh et al., 2014</a>). 
 Classification models to predict active versus inactive chemicals for each of the interference assay endpoints were built using Random Forests machine learning. Each model was tuned via a grid optimization and parameters were chosen to maximize performance on a ten-fold cross validation using Matthew’s correlation coefficient (MCC). Model performance was reported as a mean with associated standard deviation on the ten repetitions for the training set, the cross-validation, and the external test set. For details please refer to Borrel et al.
 </p>
 
@@ -202,14 +205,15 @@ Users may select one or several of these models to run on their chemical lists. 
         </form>
     </div>
     <div class="column" style="width: 50%" align=right>
-        <form action='/interferences/resources' method='get'>
+        <form action='/interferences/help' method='get'>
             <input type='submit' value='Help'/>
         </form>
     </div>
 
 </div>
 
-
+<br>
+<i>Last update: 12/15/2020</i>
 
 
 </p>

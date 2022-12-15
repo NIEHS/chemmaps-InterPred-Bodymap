@@ -3,9 +3,13 @@
 
 function chemPanel(dchem) {
     var sizeCanvas = resizeCanvas();
-    var options = { width: sizeCanvas, height: sizeCanvas };
+    var options = { width: sizeCanvas, height: sizeCanvas, compactDrawing: false, terminalCarbons: true};
     var smilesDrawer = new SmilesDrawer.Drawer(options);
 
+    QC.innerHTML = dchem.QC;
+    document.getElementById('QC').href =
+    'https://ice.ntp.niehs.nih.gov/DATASETDESCRIPTION';
+    CASIDError.innerHTML = dchem.CAS;
     CASID.innerHTML = dchem.CAS;
     CASIDtop.innerHTML = dchem.CAS;
     ChemicalNametop.innerHTML = dchem.Name;
@@ -17,9 +21,9 @@ function chemPanel(dchem) {
 
     DSSTOX.innerHTML = dchem.DSSTOX;
     document.getElementById('DSSTOX').href =
-            'https://comptox.epa.gov/dashboard/dsstoxdb/results?utf8=%E2%9C%93&search=' + dchem.DSSTOX;
+            'https://comptox.epa.gov/dashboard/chemical/details/' + dchem.DSSTOX;
     
-            ChemicalName.innerHTML = dchem.Name;
+    ChemicalName.innerHTML = dchem.Name;
     SMILES.innerHTML = dchem.SMILES;
 
     SmilesDrawer.parse(dchem.SMILES, function(tree) {

@@ -8,7 +8,6 @@ class DBrequest:
         self.conn = None
         self.verbose = verbose
 
-
     def config(self, section='postgresql'):
         parser = ConfigParser()
         parser.read(self.dbconfig)
@@ -16,7 +15,10 @@ class DBrequest:
         if parser.has_section(section):
             params = parser.items(section)
             for param in params:
-                dparams[param[0]] = param[1]
+                if param[0] == "schema":
+                    dparams["options"] = "-c search_path=dbo," + param[1]
+                else:
+                    dparams[param[0]] = param[1]
         else:
             raise Exception('Section {0} not found in the {1} file'.format(section, self.dbconfig))
 
@@ -55,6 +57,7 @@ class DBrequest:
             print("Open connection first")
 
     def extractColoumn(self, nameTable, coloumn, condition=""):
+        self.verbose=0
         self.connOpen()
         sqlCMD = "SELECT %s FROM %s %s;" % (coloumn, nameTable, condition)
         if self.verbose == 1: print(sqlCMD)

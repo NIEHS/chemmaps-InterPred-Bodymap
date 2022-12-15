@@ -1,11 +1,11 @@
-from .toolbox import loadMatrixToDict
+from .toolbox import loadMatrixToDict, createFolder
 from .DBrequest import DBrequest
 
 from os import path, remove
 from re import search
+from shutil import copy2
 import sys
-sys.path.insert(0, path.abspath('./../MD/'))
-from MD import Chemical
+import CompDesc
 
 
 class uploadSMILES:
@@ -68,13 +68,13 @@ class uploadSMILES:
 
                 # process the chemicals
                 if smiles_clean == []  or smiles_clean == "ERROR":
-                    chemical = Chemical.Chemical(chem_input, self.prout)
+                    chemical = CompDesc.CompDesc(chem_input, self.prout)
                     chemical.prepChem()
                     if chemical.err == 0:
                         smiles_clean = chemical.smi
                         inch = chemical.generateInchiKey()
                         # add in the DB
-                        self.cDB.addElement("chemicals_user", ["smiles_origin", "smiles_clean", "inchikey"], [chem_input, smiles_clean, inch])
+                        self.cDB.addElement("chemicals_user", ["smiles_origin", "smiles_clean", "inchikey", "status"], [chem_input, smiles_clean, inch, "user"])
                 else:
                     inch = smiles_clean[0][1]
                     smiles_clean = smiles_clean[0][0]
@@ -140,7 +140,7 @@ class uploadSMILES:
                 dout[k]["desc"] = "img/checkNo.png"
             else:
                 inch = self.input[str(k)]["INCH"]
-                chemical = Chemical.Chemical(SMICLEAN, self.prout)
+                chemical = CompDesc.CompDesc(SMICLEAN, self.prout)
                 chemical.prepChem()
                 chemical.generateInchiKey()
 
@@ -153,7 +153,7 @@ class uploadSMILES:
 
                     # compute desc in case of no where
                     if lval1D2D_3D == []:
-                        chemical = Chemical.Chemical(SMICLEAN, self.prout)
+                        chemical = CompDesc.CompDesc(SMICLEAN, self.prout)
                         chemical.prepChem()
                         chemical.generateInchiKey()
                         chemical.computeAll2D()
@@ -175,16 +175,21 @@ class uploadSMILES:
                             valDesc3D = [chemical.all3D[desc3D] for desc3D in ldesc3D]
                             valDesc3D = ['-9999' if desc == "NA" else desc for desc in valDesc3D]
                             w3D = "{" + ",".join(["\"%s\"" % (desc) for desc in valDesc3D]) + "}"
-                            self.cDB.addElement("chemical_description_user", ["inchikey", "source_id", "map_name", "desc_1d2d", "desc_3d"], [inch, SMICLEAN, mapName, w1D2D, w3D])
+                            self.cDB.addElement("chemical_description_user", ["inchikey", "source_id", "map_name", "desc_1d2d", "desc_3d", "status"], [inch, SMICLEAN, mapName, w1D2D, w3D, "user"])
                 
                 if lval1D2D_3D != []:
                     dout[k]["Descriptor"] = "OK"
                     dout[k]["desc"] = "img/checkOK.png"
                     filout2D.write("%i\t%s\t%s\t%s\n"%(k, SMICLEAN, inch, "\t".join([str(lval1D2D_3D[0][d]) for d in ldesc1D2D])))
                     filout3D.write("%i\t%s\t%s\n" % (k, SMICLEAN, "\t".join([str(lval1D2D_3D[1][d]) for d in ldesc3D])))
-                    # run png generation
-                    prPNG = path.abspath("./static/chemmaps/png") + "/"
-                    chemical.computePNG(prPNG)
+                    # run png generation -- HERE CHANGE PNG FOLDER
+                    prPNG = createFolder(path.abspath(self.prout + "/png") + "/")
+                    p_png = chemical.computePNG(prPNG, bg="None")
+                    if p_png != "ERROR: PNG Generation":
+                        pr_static_png =  path.abspath("./static/chemmaps/png") + "/"
+                        pr_static_png = createFolder(pr_static_png + chemical.inchikey[0:2] + "/" + chemical.inchikey[2:4] + "/")
+                        print(pr_static_png)
+                        copy2(p_png, pr_static_png + chemical.inchikey + ".png")
                 
         filout2D.close()
         filout3D.close()
@@ -219,8 +224,11 @@ def downloadDescFromDB(cDB, ldesc1D2D, ldesc3D, table, inchikey, mapName=""):
         return []
         
     else:
-        lval1D2D = lval[0][0]
-        lval3D = lval[0][1]
+        try:
+            lval1D2D = lval[0][0]
+            lval3D = lval[0][1]
+        except:
+            return []
 
     d1D2D = {}
     i = 0

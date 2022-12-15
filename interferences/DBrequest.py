@@ -16,7 +16,10 @@ class DBrequest:
         if parser.has_section(section):
             params = parser.items(section)
             for param in params:
-                dparams[param[0]] = param[1]
+                if param[0] == "schema":
+                    dparams["options"] = "-c search_path=dbo," + param[1]
+                else:
+                    dparams[param[0]] = param[1]
         else:
             raise Exception('Section {0} not found in the {1} file'.format(section, self.dbconfig))
 

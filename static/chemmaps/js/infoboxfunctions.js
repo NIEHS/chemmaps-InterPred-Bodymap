@@ -5,17 +5,23 @@ function updateInfoBox(intersect) {
     var smilesDrawer = new SmilesDrawer.Drawer(options);
 
     CompoundID.innerHTML = ID;
-    if (map == 'PFASMap' || map == 'DSSToxMap' || map == 'Tox21Map') {
+    if (map == 'pfas' || map == 'dsstox' || map == 'tox21'|| map == 'Tox21Assay' || map == 'Tox21Target' || map == 'Tox21MostActive') {
         document.getElementById('CompoundID').href =
-            'https://comptox.epa.gov/dashboard/dsstoxdb/results?utf8=%E2%9C%93&search=' + ID;
-    } else if (map == 'DrugMap') {
+            'https://comptox.epa.gov/dashboard/chemical/details/' + ID;
+
+        document.getElementById('LinkDSSTOX').href = "DSSTox/" + ID;
+
+    } else if (map == 'drugbank') {
         document.getElementById('CompoundID').href = 'https://www.drugbank.ca/drugs/' + ID;
     }
 
+    
+
+
     // case of DSStoxMap and PFASmap -> GHS
-    if (map == 'PFASMap' || map == 'DSSToxMap' || map == 'Tox21Map') {
+    if (map == 'pfas' || map == 'dsstox' || map == 'tox21' || map == 'Tox21Assay' || map == 'Tox21Target' || map == 'Tox21MostActive') {
         GHS.innerHTML = dSMILESClass[ID]['GHS_category'];
-    } else if (map == 'DrugMap') {
+    } else if (map == 'drugbank') {
         Group.innerHTML = dSMILESClass[ID]['DRUG_GROUPS'];
     }
 

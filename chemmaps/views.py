@@ -13,8 +13,13 @@ from .toolbox import loadMatrixToDict
 from .JSbuilder import JSbuilder
 from .toolbox import createFolder
 from .DSSToxPrep import DSSToxPrep
+from .loadAssays import loadAssays
+from .loadTox21AssayMap import loadTox21AssayMap
+from .loadBrowseTox21Chem import loadBrowseTox21Chem
 
 from os import path
+
+from chemmaps import toolbox
 
 
 def test(request, toto):
@@ -29,14 +34,11 @@ def index(request):
         a = randint(0, 1000000)
         request.session.get("name_session", a)
         request.session["name_session"] = a
-    return render(request, 'chemmaps/index.html')
+    return render(request, 'chemmaps/index.html', {"DTXSID":""})
 
 
-
-def launchHelp(request):
-    return render(request, 'chemmaps/help.html', {
-    })
-
+def launchHelp(request, map="all"):
+    return render(request, 'chemmaps/help.html', {"map": map})
 
 
 def download(request, name):
@@ -53,29 +55,36 @@ def download(request, name):
     raise Http404
 
 
-
-
 def launchMap(request, map):
 
     name_session = request.session.get("name_session")
 
+    # load assays from map Tox21
+    if map == "tox21":
+        cloadAssays = loadAssays()
+        d_assays = cloadAssays.DBtoDict("tox21_assays")
+    else:
+        d_assays = {}
+    d_assays = json.dumps(d_assays)
+
     # open file with
     prsession = path.abspath("./temp") + "/" + str(name_session) + "/"
 
+    # load forms
     if request.method == 'GET':
         form_smiles = UploadChemList()
-        if map == "DrugMap":
+        if map == "drugbank":
             formDesc = descDrugMapChoice()
-        elif map == "PFASMap" or map == "Tox21Map":
+        elif map == "pfas" or map == "tox21":
             formDesc = descDSSToxChoice()
         else:
             formDesc = descDSSToxMapChoice()
         formUpload = uploadList()
     else:
         form_smiles = UploadChemList(request.POST)
-        if map == "DrugMap":
+        if map == "drugbank":
             formDesc = descDrugMapChoice(request.POST)
-        elif map == "PFASMap" or map == "Tox21Map":
+        elif map == "pfas" or map == "tox21":
             formDesc = descDSSToxChoice(request.POST)
         else:
             formDesc = descDSSToxMapChoice(request.POST)
@@ -91,7 +100,7 @@ def launchMap(request, map):
         content = list(dict.fromkeys(content))
         if len(content) > 200:
             return render(request, 'chemmaps/launchMap.html', {"form_info":formDesc, "form_smiles":form_smiles,
-                                                           "from_upload": formUpload, "ErrorLine": "1", "map":map})
+                                                           "from_upload": formUpload, "ErrorLine": "1", "map":map, "dassays":d_assays})
 
         prsession = path.abspath("./temp") + "/" + str(name_session) + "/"
         createFolder(prsession, 1)
@@ -121,10 +130,10 @@ def launchMap(request, map):
 
             lsmiles = content.split("\n")
             lsmiles = list(dict.fromkeys(lsmiles))
-            if len(lsmiles) > 100:
+            if len(lsmiles) > 200:
                 return render(request, 'chemmaps/launchMap.html', {"form_info": formDesc, "form_smiles": form_smiles,
                                                                    "from_upload": formUpload, "ErrorFile": "1",
-                                                                   "map": map})
+                                                                   "map": map, "dassays":d_assays})
             cinput = uploadSMILES(lsmiles, prsession)
             cinput.prepListSMILES()
 
@@ -135,7 +144,7 @@ def launchMap(request, map):
         except:
             filin.close()
             return render(request, 'chemmaps/launchMap.html', {"form_info": formDesc, "form_smiles": form_smiles,
-                                                               "from_upload": formUpload, "ErrorFile": "1", "map": map})
+                                                               "from_upload": formUpload, "ErrorFile": "1", "map": map, "dassays":d_assays})
 
 
     elif formDesc.is_valid() == True:
@@ -143,9 +152,9 @@ def launchMap(request, map):
         ldescMap = formDesc.clean_desc()
         if ldescMap == "ERROR":
             return render(request, 'chemmaps/launchMap.html', {"form_info":formDesc, "form_smiles":form_smiles,
-                                                           "from_upload": formUpload, "Error": "1", "map":map})
+                                                           "from_upload": formUpload, "Error": "1", "map":map, "dassays":d_assays})
 
-        if map == "DSSToxMap":
+        if map == "dsstox":
 
             chemIn = formDesc.cleaned_data['chem']
             build = DSSToxPrep(chemIn, ldescMap, prsession)
@@ -156,12 +165,13 @@ def launchMap(request, map):
             if build.err == 1:
                 return render(request, 'chemmaps/launchMap.html', {"form_info": formDesc, "form_smiles": form_smiles,
                                                                    "from_upload": formUpload, "Error": "0", "map": map,
-                                                                   "ErrorDSSTox":"1"})
+                                                                   "ErrorDSSTox":"1", "dassays":d_assays})
             dcoord = json.dumps(build.coord)
             dinfo = json.dumps(build.dinfo)
             dneighbor = json.dumps(build.dneighbor)
             dSMILESClass = json.dumps(build.dSMILES)
             ldescJS = list(build.dinfo[list(build.dinfo.keys())[0]].keys())
+            center_chem = chemIn
 
 
         else:
@@ -175,24 +185,117 @@ def launchMap(request, map):
             dneighbor = json.dumps(dJS["neighbor"])
             dSMILESClass = json.dumps(dJS["SMILESClass"])
             ldescJS = list(dJS["info"][list(dJS["info"].keys())[0]].keys())
+            center_chem = ""
 
         mapJS = json.dumps(map)
         prSessionJS = json.dumps(prsession[1:])
 
         return render(request, 'chemmaps/Map3D.html', {"dcoord": dcoord, "dinfo": dinfo, "dneighbor": dneighbor,
                                                              "dSMILESClass":dSMILESClass,
-                                                             "ldesc":ldescJS, "map":map, "mapJS": mapJS,"prSessionJS":prSessionJS })
+                                                             "ldesc":ldescJS, "map":map, "mapJS": mapJS,"prSessionJS":prSessionJS, "assay":"" , "center_map":center_chem})
 
     else:
         return render(request, 'chemmaps/launchMap.html', {"form_info":formDesc, "form_smiles":form_smiles,
-                                                           "from_upload": formUpload, "Error": "0", "map":map})
+                                                           "from_upload": formUpload, "Error": "0", "map":map, "dassays":d_assays})
+
+
+def launchTox21AssayMap(request, assay):
+
+    
+    cloadAssays = loadTox21AssayMap(assay)
+    cloadAssays.loadMapCoords()
+    cloadAssays.loadAssayResults()
+
+    dmap = cloadAssays.dmap
+
+    #   format for JS
+    dcoord = json.dumps(dmap["coord"])
+    dinfo = json.dumps(dmap["info"])
+    dneighbor = json.dumps(dmap["neighbor"])
+    dSMILESClass = json.dumps(dmap["SMILESClass"])
+    ldescJS = list(dmap["info"][list(dmap["info"].keys())[0]].keys())
+
+    mapJS = json.dumps("Tox21Assay")
+    prSessionJS = json.dumps("")
+
+
+    return render(request, 'chemmaps/Map3D.html', {"dcoord": dcoord, "dinfo": dinfo, "dneighbor": dneighbor,
+                                                             "dSMILESClass":dSMILESClass,
+                                                             "ldesc":ldescJS, "map":"Tox21Assay", "mapJS": mapJS, "prSessionJS":prSessionJS, "assay":assay, "nb_active": cloadAssays.nb_active, "nb_tested":  cloadAssays.nb_tested })
+
+
+def launchTox21TagetMap(request, target):
+
+
+    cloadAssays = loadTox21AssayMap(target)
+    cloadAssays.loadMapCoords()
+    cloadAssays.loadAssayTargeted()
+
+    dmap = cloadAssays.dmap
+
+    #   format for JS
+    dcoord = json.dumps(dmap["coord"])
+    dinfo = json.dumps(dmap["info"])
+    dneighbor = json.dumps(dmap["neighbor"])
+    dSMILESClass = json.dumps(dmap["SMILESClass"])
+    ldescJS = list(dmap["info"][list(dmap["info"].keys())[0]].keys())
+
+    mapJS = json.dumps("Tox21Assay")
+    prSessionJS = json.dumps("")
+
+
+    return render(request, 'chemmaps/Map3D.html', {"dcoord": dcoord, "dinfo": dinfo, "dneighbor": dneighbor,
+                                                             "dSMILESClass":dSMILESClass,
+                                                             "ldesc":ldescJS, "map":"Tox21Target", "mapJS": mapJS, "prSessionJS":prSessionJS, "target":target, "assay":"", "nb_assays": cloadAssays.nb_assays})#, "nb_active": cloadAssays.nb_active, "nb_tested":  cloadAssays.nb_tested })
+
+
+def launchTox21MostPotent(request):
+
+
+    cloadAssays = loadTox21AssayMap("")
+    cloadAssays.loadMapCoords()
+    cloadAssays.loadAssayMostActive()
+
+    dmap = cloadAssays.dmap
+
+    #   format for JS
+    dcoord = json.dumps(dmap["coord"])
+    dinfo = json.dumps(dmap["info"])
+    dneighbor = json.dumps(dmap["neighbor"])
+    dSMILESClass = json.dumps(dmap["SMILESClass"])
+    ldescJS = list(dmap["info"][list(dmap["info"].keys())[0]].keys())
+
+    mapJS = json.dumps("Tox21MostActive")
+    prSessionJS = json.dumps("")
+
+
+    return render(request, 'chemmaps/Map3D.html', {"dcoord": dcoord, "dinfo": dinfo, "dneighbor": dneighbor,
+                                                             "dSMILESClass":dSMILESClass,
+                                                             "ldesc":ldescJS, "map":"Tox21Target", "mapJS": mapJS, "prSessionJS":prSessionJS, "target":"Most active", "assay":"", "nb_assays": cloadAssays.nb_assays})#, "nb_active": cloadAssays.nb_active, "nb_tested":  cloadAssays.nb_tested })
+
+
+def browseChemicals(request):
+
+    name_session = request.session.get("name_session")
+    prsession = toolbox.createFolder(path.abspath("./temp") + "/" + str(name_session) + "/")
+    
+    c_loadTox21Chem = loadBrowseTox21Chem()
+    c_loadTox21Chem.loadAssaysAndChem()
+    c_loadTox21Chem.writeTable(prsession)
+
+    d_chem_JS = json.dumps(c_loadTox21Chem.d_chem)
+    d_assays_JS = json.dumps(c_loadTox21Chem.d_assays)
+
+
+    return render(request, 'chemmaps/chemicalBrowser.html', {"d_chem":d_chem_JS, "d_assays":d_assays_JS})
 
 
 # case of automatic launch -> Comptox
 def launchDSSToxMap(request, DTXSID):
 
     # fault Ldesc
-    ldescMap = ["LD50_mgkg", "CATMoS_VT_pred", "EPA_category", "MolWeight","LogP_pred"]
+    ldescMap = ["nbLipinskiFailures", "CoMPARA_Bind_pred", "CERAPP_Bind_pred", "MolWeight",
+                                                   "LogP_pred"]
 
     build = DSSToxPrep(DTXSID, ldescMap, "")
     build.loadChemMapCenterChem(DTXSID, center = 1, nbChem = 10000)
@@ -206,13 +309,12 @@ def launchDSSToxMap(request, DTXSID):
         dSMILESClass = json.dumps(build.dSMILES)
         ldescJS = list(build.dinfo[list(build.dinfo.keys())[0]].keys())
 
-        mapJS = json.dumps("DSSToxMap")
+        mapJS = json.dumps("dsstox")
         prSessionJS = json.dumps("")
 
-        return render(request, 'chemmaps/Map3D.html', {"dcoord": dcoord, "dinfo": dinfo, "dneighbor": dneighbor,
-                                                             "dSMILESClass":dSMILESClass,
-                                                             "ldesc":ldescJS, "map":"DSSToxMap", "mapJS": mapJS,"prSessionJS":prSessionJS })
+        return render(request, 'chemmaps/Map3D.html', {"dcoord": dcoord, "dinfo": dinfo, "dneighbor": dneighbor, "dSMILESClass":dSMILESClass, "ldesc":ldescJS, "map":"dsstox", "mapJS": mapJS,"prSessionJS":prSessionJS, "center_map":DTXSID, "assay":"" })
 
+    return 
 
 
 def computeDescriptor(request, map):
@@ -236,14 +338,14 @@ def computeDescriptor(request, map):
 
     # form for descriptors
     if request.method == 'GET':
-        if map == "DrugMap":
+        if map == "drugbank":
             formDesc = descDrugMapChoice()
-        elif map == "PFASMap" or map == "Tox21Map":
+        elif map == "pfas" or map == "tox21":
             formDesc = descDSSToxChoice()
         else:
             formDesc = descDSSToxMapChoice()
     else:
-        if map == "DrugMap":
+        if map == "drugbank":
             formDesc = descDrugMapChoice(request.POST)
         else:
             formDesc = descDSSToxChoice(request.POST)
@@ -256,7 +358,7 @@ def computeDescriptor(request, map):
                                                             "dSMILESOUT": cinput.dclean["OUT"], "ddesc":cinput.ddesc,
                                                             "form_info": formDesc, "Error": "1"})
         else:
-            if map == "DSSToxMap":
+            if map == "dsstox":
 
                 build = JSbuilder(map, ldescMap, prsession)
                 build.generateCoords(lfileDesc[0], lfileDesc[1])
@@ -290,9 +392,6 @@ def computeDescriptor(request, map):
                 dneighbor = json.dumps(dJS["neighbor"])
                 dSMILESClass = json.dumps(dJS["SMILESClass"])
                 ldesc = list(dJS["info"][list(dJS["info"].keys())[0]].keys())
-            #a = cDSSTox.dinfo
-            #b = cDSSTox.dinfo["1"]
-            #dddd
 
             prSessionJS = json.dumps(prsession[1:])
             mapJS = json.dumps(map)
@@ -300,16 +399,13 @@ def computeDescriptor(request, map):
 
         return render(request, 'chemmaps/Map3D.html', {"dcoord": dcoord, "dinfo": dinfo, "dneighbor": dneighbor,
                                                            "dSMILESClass": dSMILESClass, "ldesc": ldesc,
-                                                            "map": map, "mapJS": mapJS, "prSessionJS":prSessionJS})
+                                                            "map": map, "mapJS": mapJS, "prSessionJS":prSessionJS,
+                                                            "assay":""})
 
     else:
         return render(request, 'chemmaps/descriptor.html', {"map": map, "dSMILESIN":cinput.dclean["IN"],
                                                             "dSMILESOUT": cinput.dclean["OUT"], "ddesc":cinput.ddesc,
                                                             "form_info": formDesc, "Error": "0"})
-
-
-
-
 
 
 

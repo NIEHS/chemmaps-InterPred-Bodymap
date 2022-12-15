@@ -11,15 +11,14 @@ class mapChem :
         self.CASin = CASin
         self.cDB = DBrequest()
         self.cDB.verbose = 0
-        
-    
+           
     def loadFromDB(self, tableAssayMap, tableAC50, tableGene):
 
-        dac50 = self.cDB.execCMD("SELECT assay, ac50 from %s where casn='%s'"%(tableAC50, self.CASin))
+        dac50 = self.cDB.execCMD("SELECT assay, ac50 FROM %s WHERE casn='%s'"%(tableAC50, self.CASin))
         self.dac50 = dac50
 
         # load premap
-        lassayMapped = self.cDB.execCMD("SELECT assay, gene, type_map, organ, system from %s"%(tableAssayMap))
+        lassayMapped = self.cDB.execCMD("SELECT assay, gene, type_map, organ, system FROM %s"%(tableAssayMap))
         dassayMapped = {}
         for assayMapped in lassayMapped:
             assay = assayMapped[0]
@@ -36,9 +35,10 @@ class mapChem :
         self.dassayMapped = dassayMapped
         self.tableGene = tableGene
 
+    def mapChemToBody(self, expControl):
 
-
-    def mapChemToBody(self):
+        if expControl == "organ":
+            dExp = loadMatrixToDict("./static/bodymap/mapping/controlExpByOrgan.txt")
 
         dvia = {"Immune System": "Immune System", "Digestive System": "Liver", "Respiratory System": "Lung", "Digestive System":"Stomach"}
         dout = {}
@@ -96,13 +96,19 @@ class mapChem :
 
             elif typeMap == "gene":
                 gene = self.dassayMapped[assay]["gene"]
-                llexp = self.cDB.execCMD("SELECT gene, system, organ, expression, control from %s WHERE gene='%s'"%(self.tableGene, self.dassayMapped[assay]["gene"]))
+                llexp = self.cDB.execCMD("SELECT gene, system, organ, expression, control FROM %s WHERE gene='%s'"%(self.tableGene, self.dassayMapped[assay]["gene"]))
+                
                 for lexp in llexp:
-                    exp = float(lexp[3]) / float(lexp[4])
-                    if exp < 2.0:
-                        continue
                     system = lexp[1]
                     organ = lexp[2]
+                    if expControl == "gene":# error gene
+                        try: exp = float(lexp[3]) / float(lexp[4])
+                        except: exp = 0.0
+                    else: 
+                        exp = float(lexp[3]) / float(dExp[organ]["control"])
+                    if exp < 2.0:
+                        continue
+                   
                     if not assay in list(dout.keys()):
                         dout[assay] = {}
                     if not system in list(dout[assay].keys()):

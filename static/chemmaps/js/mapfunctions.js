@@ -1,61 +1,5 @@
 //position points on the map
 
-function posCloud(din, dcolorRGB, size, scene) {
-    var colors = new Float32Array(Object.keys(din).length * 3);
-    var positions = new Float32Array(Object.keys(din).length * 3);
-    var sizes = new Float32Array(Object.keys(din).length);
-    var color = new THREE.Color();
-    //console.log(color);
-
-    //console.log(color);
-    //console.log(din);
-    var count = 0;
-    for (var i in din) {
-        console.log(i);
-        positions[count * 3] = parseFloat(din[i][0] * 20);
-        positions[count * 3 + 1] = parseFloat(din[i][1] * 20);
-        positions[count * 3 + 2] = parseFloat(din[i][2] * 20);
-        sizes[count] = size;
-        color.setRGB(dcolorRGB['r'] / 250, dcolorRGB['g'] / 250, dcolorRGB['b'] / 250);
-        //console.log(color.r);
-        colors[count * 3] = color.r;
-        colors[count * 3 + 1] = color.g;
-        colors[count * 3 + 2] = color.b;
-        count = count + 1;
-    }
-    // manage geometry
-    var geometry = new THREE.BufferGeometry();
-    geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3));
-    geometry.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
-    geometry.computeBoundingSphere();
-    // textures and material
-    var textureLoader = new THREE.TextureLoader();
-    var sprite = textureLoader.load('https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/aspirin.png');
-    //en conssprite.repeat.set( 1, 1 );
-    //		sprite.wrapS = sprite.wrapT = THREE.RepeatWrapping;
-    //				sprite.format = THREE.RGBFormat;
-
-    //make level of shpere
-    //sprite.wrapS = THREE.RepeatWrapping;
-    //sprite.wrapT = THREE.RepeatWrapping;
-    //sprite.repeat.set( 4, 4 );
-
-    var material;
-    material = new THREE.PointsMaterial({
-        size: size,
-        map: sprite,
-        alphaTest: 0.9,
-        color: 0x888888,
-        transparent: true,
-    });
-    //material.needsUpdate=true;
-
-    // create point
-    particules = new THREE.Points(geometry, material);
-    scene.add(particules);
-}
-
 function posPoint(lcoord, name, colorhexa, sprite, size, fact, scene) {
     var textureLoader = new THREE.TextureLoader();
 
@@ -85,35 +29,16 @@ function posPoint(lcoord, name, colorhexa, sprite, size, fact, scene) {
     return particule;
 }
 
-function posMeshs(din, scene, color, rad) {
-    var lmesh = [];
-    // Texture
-    var textureLoader = new THREE.TextureLoader();
-    var texture = textureLoader.load('https://sandbox.ntp.niehs.nih.gov/chemmaps/static/img/disturb.jpg');
-    for (var i in din) {
-        var objectGeometry = new THREE.SphereGeometry(rad);
-        var objectMaterial = new THREE.MeshLambertMaterial({ map: texture, color: color });
-        var mesh = new THREE.Mesh(objectGeometry, objectMaterial);
-        mesh.position.x = parseFloat(din[i][0] * 20);
-        mesh.position.y = parseFloat(din[i][1] * 20);
-        mesh.position.z = parseFloat(din[i][2] * 20);
-        mesh.name = i;
-        scene.add(mesh);
-        lmesh.push(mesh);
-    }
-    return lmesh;
-}
 
-function posPointIndividuallyDrugMap() {
+function posPointIndividuallyDrugMap(repos) {
     //console.log(color);
     // textures and material
-    var dout = { approved: [], withdraw: [], indev: [], add: [] };
     for (var i in dcoords) {
         var position = new Float32Array(3);
-        var sizes = new Float32Array(1);
         position[0] = parseFloat(dcoords[i][0] * fact);
         position[1] = parseFloat(dcoords[i][1] * fact);
         position[2] = parseFloat(dcoords[i][2] * fact);
+        console.log(dSMILESClass);
         if (dSMILESClass[i]['DRUG_GROUPS'].search('approved') !== -1) {
             var typeDrug = 'approved';
         } else if (dSMILESClass[i]['DRUG_GROUPS'].search('withdraw') !== -1) {
@@ -122,6 +47,9 @@ function posPointIndividuallyDrugMap() {
             var typeDrug = 'add';
         } else {
             var typeDrug = 'indev';
+        }
+        if(repos != "all" && repos != typeDrug){
+            continue;
         }
         var size = dsize[typeDrug];
         var colorhexa = dcol[typeDrug];
@@ -143,58 +71,173 @@ function posPointIndividuallyDrugMap() {
         var particule = new THREE.Points(geometry, material);
         particule.name = i;
         particule.col = colorhexa;
-        dout[typeDrug].push(particule);
+        dpoints[typeDrug].push(particule);
         scene.add(particule);
     }
-    return dout;
 }
 
-function posPointIndividuallyDSSTox() {
-    var dout = { classified: [], noclassified: [], add: [] };
+function posPointIndividuallyDSSTox(repos) {
     for (var i in dcoords) {
         var position = new Float32Array(3);
-        var sizes = new Float32Array(1);
         position[0] = parseFloat(dcoords[i][0] * fact);
         position[1] = parseFloat(dcoords[i][1] * fact);
         position[2] = parseFloat(dcoords[i][2] * fact);
-        var GHScat = dSMILESClass[i]['GHS_category'];
-        if (GHScat == 'NA') {
-            var colorhexa = dcol['NA'];
-            var typechem = 'noclassified';
-        } else {
-            if (GHScat == 'add') {
-                var typechem = 'add';
-                var colorhexa = 0xffffff;
-            } else {
-                var typechem = 'classified';
-                var colorhexa = dcol[parseFloat(GHScat)];
-            }
-        }
-        var sprite = dsprite[typechem];
-        var size = dsize[typechem];
 
-        // manage geometry
-        var geometry = new THREE.BufferGeometry();
-        geometry.addAttribute('position', new THREE.BufferAttribute(position, 3));
-        geometry.addAttribute('size', new THREE.BufferAttribute(size, 1));
-        // have to fix for the rayscatting
-        geometry.computeBoundingSphere();
-        geometry.boundingSphere.radius = size;
-        var material = new THREE.PointsMaterial({
-            size: size,
-            map: sprite,
-            alphaTest: 0.1,
-            color: colorhexa,
-            transparent: true,
-        });
-        var particule = new THREE.Points(geometry, material);
-        particule.name = i;
-        particule.col = colorhexa;
-        dout[typechem].push(particule);
-        scene.add(particule);
+        if (map=="Tox21Assay" || map == 'Tox21Target' || map == 'Tox21MostActive'){
+            var Assaycat = dSMILESClass[i]['Assay Outcome'];
+            if (Assaycat.search("inconclusive") !== -1) {
+                var colorhexa = dcol['inconclusive'];
+                var typechem = 'noclassified';
+                var size = dsize[typechem];
+            } else if(Assaycat.search("inactive") !== -1) {
+                var typechem = 'classified';
+                var colorhexa = dcol['inactive'];
+                var size = dsize[typechem];
+            }else if (Assaycat.search("Not tested") !== -1) {
+                    var colorhexa = dcol['inconclusive'];
+                    var typechem = 'noclassified';
+                    var size = dsize[typechem];
+            }else{
+                var typechem = 'classified';
+                var colorhexa =  dcol['active'];
+                var size = dsize[typechem];
+            }
+            var sprite = dsprite[typechem];
+            
+            if(repos != "all" && repos != typechem){
+                continue;
+            }
+
+            // manage geometry
+            var geometry = new THREE.BufferGeometry();
+            geometry.addAttribute('position', new THREE.BufferAttribute(position, 3));
+            geometry.addAttribute('size', new THREE.BufferAttribute(size, 1));
+            // have to fix for the rayscatting
+            geometry.computeBoundingSphere();
+            geometry.boundingSphere.radius = size;
+            var material = new THREE.PointsMaterial({
+                size: size,
+                map: sprite,
+                alphaTest: 0.1,
+                color: colorhexa,
+                transparent: true,
+            });
+            var particule = new THREE.Points(geometry, material);
+            particule.name = i;
+            particule.col = colorhexa;
+            dpoints[typechem].push(particule);
+            scene.add(particule);
+
+        }else{
+            var GHScat = dSMILESClass[i]['GHS_category'];
+            if (GHScat == 'NA') {
+                var colorhexa = dcol['NA'];
+                var typechem = 'noclassified';
+            } else {
+                if (GHScat == 'add') {
+                    var typechem = 'add';
+                    var colorhexa = 0xffffff;
+                } else {
+                    var typechem = 'classified';
+                    var colorhexa = dcol[parseFloat(GHScat)];
+                }
+            }
+            var sprite = dsprite[typechem];
+            var size = dsize[typechem];
+    
+            if(repos != "all" && repos != typechem){
+                continue;
+            }
+
+            // manage geometry
+            var geometry = new THREE.BufferGeometry();
+            geometry.addAttribute('position', new THREE.BufferAttribute(position, 3));
+            geometry.addAttribute('size', new THREE.BufferAttribute(size, 1));
+            // have to fix for the rayscatting
+            geometry.computeBoundingSphere();
+            geometry.boundingSphere.radius = size;
+            var material = new THREE.PointsMaterial({
+                size: size,
+                map: sprite,
+                alphaTest: 0.1,
+                color: colorhexa,
+                transparent: true,
+            });
+            var particule = new THREE.Points(geometry, material);
+            particule.name = i;
+            particule.col = colorhexa;
+            dpoints[typechem].push(particule);
+            scene.add(particule);
+        }
     }
-    return dout;
 }
+
+function resetPoint(){
+
+    for (typechem in dpoints) {
+        for (var i = 0; i < dpoints[typechem].length; i++) {
+            var i_original = dpoints[typechem][i].name
+            if (map=="Tox21Assay" || map == 'Tox21Target' || map == 'Tox21MostActive'){
+                var Assaycat = dSMILESClass[i_original]['Assay Outcome'];
+                if (Assaycat.search("inconclusive") !== -1) {
+                    var colorhexa = dcol['inconclusive'];
+                    var typechem = 'noclassified';
+                    var size = dsize[typechem];
+                } else if(Assaycat.search("inactive") !== -1) {
+                    var typechem = 'classified';
+                    var colorhexa = dcol['inactive'];
+                    var size = dsize[typechem];
+                }else if (Assaycat.search("Not tested") !== -1) {
+                        var colorhexa = dcol['inconclusive'];
+                        var typechem = 'noclassified';
+                        var size = dsize[typechem];
+                }else{
+                    var typechem = 'classified';
+                    var colorhexa =  dcol['active'];
+                    var size = dsize[typechem];
+                }
+                var sprite = dsprite[typechem];
+            }else if (map == "drugbank"){
+                if (dSMILESClass[i_original]['DRUG_GROUPS'].search('approved') !== -1) {
+                    var typechem = 'approved';
+                } else if (dSMILESClass[i_original]['DRUG_GROUPS'].search('withdraw') !== -1) {
+                    var typechem = 'withdraw';
+                } else if (dSMILESClass[i_original]['DRUG_GROUPS'].search('add') !== -1) {
+                    var typechem = 'add';
+                } else {
+                    var typechem = 'indev';
+                }
+                var size = dsize[typechem];
+                var colorhexa = dcol[typechem];
+                var sprite = dsprite[typechem];
+            }else{
+                var GHScat = dSMILESClass[i_original]['GHS_category'];
+                if (GHScat == 'NA') {
+                    var colorhexa = dcol['NA'];
+                    var typechem = 'noclassified';
+                } else {
+                    if (GHScat == 'add') {
+                        var typechem = 'add';
+                        var colorhexa = 0xffffff;
+                    } else {
+                        var typechem = 'classified';
+                        var colorhexa = dcol[parseFloat(GHScat)];
+                    }
+                }
+                var sprite = dsprite[typechem];
+                var size = dsize[typechem];
+            }
+            dpoints[typechem][i].material.map = sprite;
+            dpoints[typechem][i].material.color.setHex(colorhexa);
+            dpoints[typechem][i].material.size = size;
+            dpoints[typechem][i].col = colorhexa;
+            dpoints[typechem][i].material.map.needsUpdate = true;
+            dpoints[typechem][i].material.size.needsUpdate = true;
+        }
+    }
+}
+
+
 // Build axes and text
 function buildAxes(length, x, y, z) {
     var axes = new THREE.Object3D();
@@ -264,35 +307,6 @@ function createText(scene, stext, x, y, z) {
     );
 }
 
-//light position ///not use
-function posLights(xmax, ymax, zmax, scale, color) {
-    var llights = [];
-    for (var x = -xmax; x < xmax; x = x + scale) {
-        for (var y = -ymax; y < ymax; y = y + scale) {
-            for (var z = -zmax; z < zmax; z = z + scale) {
-                var light = posLight(x, y, z, color);
-                scene.add(light);
-                llights.push(light);
-            }
-        }
-    }
-    return llights;
-}
-
-function posLight(x, y, z, color) {
-    var light;
-    var intensity = 100;
-    var distance = 300;
-    var decay = 2.0;
-    var sphere = new THREE.SphereGeometry(0.1, 10, 8);
-    light = new THREE.PointLight(color, intensity, distance, decay);
-    light.add(new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: color })));
-    light.position.x = x;
-    light.position.y = y;
-    light.position.z = z;
-    return light;
-}
-
 // render animation
 function animate() {
     requestAnimationFrame(animate);
@@ -343,11 +357,6 @@ function callbackFunc(response) {
     console.log(response);
 }
 
-
-//var fs = require('fs');
-
-
-
 // map function
 function drawChemical() {
     document.getElementById('drawChemical');
@@ -355,21 +364,17 @@ function drawChemical() {
     for (ktype in dpoints) {
         for (var i = 0; i < dpoints[ktype].length; i++) {
             if (ID == dpoints[ktype][i].name) {
-                console.log(ktype)
                 var namepng = dSMILESClass[dpoints[ktype][i].name]['inchikey'];
-                ppng = "https://sandbox.ntp.niehs.nih.gov/chemmaps/static/png/" + namepng + '.png'
-                //if(fs.exists(ppng) == true){
-                    var texture = textureLoader.load(ppng);
-                    dpoints[ktype][i].material.map = texture;
-                    console.log('https://sandbox.ntp.niehs.nih.gov/chemmaps/static/png/' + namepng + '.png')
-                    dpoints[ktype][i].material.size = 15;
-                    dpoints[ktype][i].material.color.setHex(0xffffff);
-                    dpoints[ktype][i].col = 0xffffff;
-                    dpoints[ktype][i].material.map.needsUpdate = true;
-                    dpoints[ktype][i].material.size.needsUpdate = true;
-               // } else {
-               //     console.log(ppng);
-                //}
+                // TO CHECK IN PRODUCTION ===> NEED to add in case of in the repertory
+                var namepng = dSMILESClass[dpoints[ktype][i].name]['inchikey'];
+                var ppng = "/static_chemmaps/chemmaps/png/" + namepng.substring(0, 2) + "/" + namepng.substring(2, 4) + "/" + namepng + ".png"
+                var texture = textureLoader.load(ppng);
+                dpoints[ktype][i].material.map = texture;
+                dpoints[ktype][i].material.size = 15;
+                dpoints[ktype][i].material.color.setHex(0xffffff);
+                dpoints[ktype][i].col = 0xffffff;
+                //dpoints[ktype][i].material.map.needsUpdate = true;
+                //dpoints[ktype][i].material.size.needsUpdate = true;
             }
         }
     }
@@ -395,7 +400,10 @@ function downloadNeighbor() {
     
     //console.log(dneighbors[IDcenter]);
     for (var p = 0; p < dneighbors[IDcenter].length; p++) {
-        textin = textin + createLineWriteForTable(dneighbors[IDcenter][p], IDcenter, ldesc);
+        if(dneighbors[IDcenter][p] in dSMILESClass){
+            textin = textin + createLineWriteForTable(dneighbors[IDcenter][p], IDcenter, ldesc);
+        }
+        ;
     }
     //console.log(textin);
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(textin));
@@ -408,6 +416,7 @@ function downloadNeighbor() {
 }
 
 function createLineWriteForTable(IDchem, IDcenter, ldesc) {
+    
     var lineW =
         IDchem.toString() +
         '\t' +
@@ -416,7 +425,7 @@ function createLineWriteForTable(IDchem, IDcenter, ldesc) {
         dSMILESClass[IDchem]['inchikey'] +
         '\t';
     
-    if (map == 'DrugMap') {
+    if (map == 'drugbank') {
         lineW = lineW + dSMILESClass[IDchem]['DRUG_GROUPS'];
     } else {
         lineW = lineW + dSMILESClass[IDchem]['GHS_category'];
@@ -564,7 +573,7 @@ function extractNeighbor(that) {
                 //console.log(dSMILESClass[IDtemp]['GHS_category']);
                 //alert(map);
                 if (flag == 0) {
-                    if (map == 'DrugMap') {
+                    if (map == 'drugbank') {
                         if (dSMILESClass[IDtemp]['DRUG_GROUPS'].search('approved') !== -1) {
                             var typeChem = 'approved';
                         } else if (dSMILESClass[IDtemp]['DRUG_GROUPS'].search('withdraw') !== -1) {
@@ -575,7 +584,24 @@ function extractNeighbor(that) {
                             var typeChem = 'indev';
                         }
                         var coloradd = dcol[typeChem];
-                    } else if (map == 'DSSToxMap' || map == 'PFASMap' || map == 'Tox21Map') {
+                    
+                    }else if (map == "Tox21Assay" || map == "Tox21Target" || map == 'Tox21MostActive'){
+
+                        var Assaycat = dSMILESClass[IDtemp]['Assay Outcome'];
+                        if (Assaycat.search("inconclusive") !== -1) {
+                            var typeChem = 'noclassified';
+                            var coloradd = dcol["inconclusive"]
+                        } else if(Assaycat.search("inactive") !== -1) {
+                            var typeChem = 'classified';
+                            var coloradd = dcol["inactive"]
+                        }else if (Assaycat.search("Not tested") !== -1) {
+                            var typeChem = 'noclassified';
+                            var coloradd = dcol["inconclusive"]
+                        }else{
+                            var typeChem = 'classified';
+                            var coloradd = dcol["active"]
+                        }
+                    }else {
                         if (dSMILESClass[IDtemp]['GHS_category'] == 'NA') {
                             var typeChem = 'noclassified';
                         } else if (dSMILESClass[IDtemp]['GHS_category'] == 'add') {
@@ -638,7 +664,6 @@ function cameraCenterPoint() {
     istepcamera = 0;
 }
 
-
 function searchID(that) {
     var thatUpper = that.toUpperCase();
     for (ktype in dpoints) {
@@ -665,63 +690,6 @@ function searchID(that) {
 
     alert(that + ' is not a valide request\nReset the map and/or check your request\n\n');
 }
-
-
-
-
-// rewrite search function
-//function searchID(that) {
-//    var thatUpper = that.toUpperCase();
-//    for (ktype in dpoints) {
-//        for (var i = 0; i < dpoints[ktype].length; i++) {
-//            if (thatUpper == dpoints[ktype][i].name) {
-//                ID = thatUpper;
-//                new TWEEN.Tween(controls.target)
-//                    .to(
-//                        {
-//                            x: dcoords[ID][0] * fact,
-//                            y: dcoords[ID][1] * fact,
-//                            z: dcoords[ID][2] * fact,
-//                        },
-//                        500
-//                    )
-//                    //.easing( TWEEN.Easing.Elastic.Out).start();
-//                    .easing(TWEEN.Easing.Linear.None)
-//                   .start();
-//                updateInfoBox(dpoints[ktype][i]);
-//                return;
-//            }
-//        }
-//    }
-//    var thatlower = that.toLowerCase();
-//    for (ktype in dpoints) {
-//        for (var i = 0; i < dpoints[ktype].length; i++) {
-//            var IDsearch = dpoints[ktype][i].name;
-//            var genericlower = dinfo[IDsearch][1].toLowerCase();
-//            if (
-//                dinfo[IDsearch][5].search(thatlower) != -1 ||
-//                genericlower.search(thatlower) != -1
-//            ) {
-//                ID = IDsearch;
-//                new TWEEN.Tween(controls.target)
-//                    .to(
-//                        {
-//                            x: dcoords[ID][0] * fact,
-//                            y: dcoords[ID][1] * fact,
-//                            z: dcoords[ID][2] * fact,
-//                        },
-//                        500
-//                    )
-//                    .easing(TWEEN.Easing.Linear.None)
-//                    .start();
-//                //    cameraCenterPoint();
-//                updateInfoBox(dpoints[ktype][i]);
-//                return;
-//            }
-//        }
-//    }
-//    alert(that + ' is not a valide request\nReset the map and/or check your request\n\n');
-//}
 
 function searchIDtox(that) {
     var thatUpper = that.toUpperCase();

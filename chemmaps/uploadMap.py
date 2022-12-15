@@ -30,7 +30,8 @@ DDESCDSSTOX = {"EPA_category": "EPA category", "LD50_mgkg": "LD50 (mg/kg)",
                "LogVP_pred": "Log vapor pressure (mmHg)", "LogWS_pred": "Log Water solubility", "MolWeight": "MW",
                "LogOH_pred": "Log Atmospheric constant (cm3/molsec)",
                "BioDeg_LogHalfLife_pred": "Biodegradation half-life",
-               "BP_pred": "Boiling Point", "nbLipinskiFailures": "Lipinski Failures"}
+               "BP_pred": "Boiling Point", "nbLipinskiFailures": "Lipinski Failures",
+               "GHS_category": "GHS category",}
 
 def propToDict(ldbprop, ldesc):
     dout = {}
@@ -68,24 +69,17 @@ class loadingMap:
         self.DB.verbose = 0
         self.lprop = lprop
 
+        lprop = self.DB.extractColoumn("chem_descriptor_opera_name_new", "name")
+        self.lallProp = [prop [0] for prop in lprop]
+
         # load order prop
-        if map == "DrugMap":
+        if map == "drugbank":
             lprop = self.DB.extractColoumn("chem_prop_drugbank_name", "name")
-            #self.lallProp = lprop
-            self.lallProp = [prop [0] for prop in lprop]
-            
-            # to del after test 
-            if lprop == []:
-                self.lprop = self.lallProp
-        
+            self.lPropTox = [prop [0] for prop in lprop]
         else:
-            lprop = self.DB.extractColoumn("chem_prop_dsstox_name", "name")
-            #self.lallProp = lprop
-            self.lallProp = [prop [0] for prop in lprop]
+            lprop = self.DB.extractColoumn("chem_toxexp_name", "name")
+            self.lPropTox = [prop [0] for prop in lprop]
             
-            # to del after test 
-            if lprop == []:
-                self.lprop = self.lallProp
 
     def loadMap(self):
         dout = {}
@@ -97,14 +91,14 @@ class loadingMap:
         #self.DB.verbose = 1
         # load chem matrix
 
-        if self.map == "DrugMap":
-            lchem = self.DB.extractColoumn("mvwchemmap_mapdrugbank", "drugbank_id, smiles_clean, inchikey, dim1d2d[1], dim1d2d[2], dim3d[1], neighbors_dim3, prop_value")
+        if self.map == "drugbank":
+            lchem = self.DB.extractColoumn("mvwchemmap_mapdrugbank", "drugbank_id, smiles_clean, inchikey, dim1d2d[1], dim1d2d[2], dim3d[1], neighbors_dim3, prop_value, prop_tox")
 
-        elif self.map == "PFASMap":
-            lchem = self.DB.extractColoumn("mvwchemmap_mappfas", "dsstox_id, smiles_clean, inchikey, dim1d2d[1], dim1d2d[2], dim3d[1], neighbors_dim3, prop_value")
+        elif self.map == "pfas":
+            lchem = self.DB.extractColoumn("mvwchemmap_mappfas", "dsstox_id, smiles_clean, inchikey, dim1d2d[1], dim1d2d[2], dim3d[1], neighbors_dim3, prop_value, prop_tox")
 
-        elif self.map == "Tox21Map":
-            lchem = self.DB.extractColoumn("mvwchemmap_maptox21", "dsstox_id, smiles_clean, inchikey, dim1d2d[1], dim1d2d[2], dim3d[1], neighbors_dim3, prop_value")
+        elif self.map == "tox21":
+            lchem = self.DB.extractColoumn("mvwchemmap_maptox21", "dsstox_id, smiles_clean, inchikey, dim1d2d[1], dim1d2d[2], dim3d[1], neighbors_dim3, prop_value, prop_tox")
 
         # format for JS dictionnary
         dinch = {}
@@ -118,31 +112,68 @@ class loadingMap:
             zadd = chem[5]
             lneighbors = chem[6]
             lprop = chem[7]
-
-            if lprop == None:
-                continue
+            lprop_tox = chem[8]
 
             #coords
             dout["coord"][db_id] = [float(xadd), float(yadd), float(zadd)]
-        
+
             # info
             dout["info"][db_id] = {}
             for descMap in self.lprop:
-                if self.map == "DrugMap":
-                    try: dout["info"][db_id][DDESCDRUGMAP[descMap]] = round(float(lprop[self.lallProp.index(descMap)]),1)
-                    except: dout["info"][db_id][DDESCDRUGMAP[descMap]] = lprop[self.lallProp.index(descMap)]
+                if self.map == "drugbank":
+                    if descMap in self.lallProp:
+                        val = lprop[self.lallProp.index(descMap)]
+                    elif descMap in self.lPropTox:
+                        if lprop_tox == None:
+                            val = "NA"
+                        else:
+                            val = lprop_tox[self.lPropTox.index(descMap)]
+                    else:
+                        val = "NA"
+                    
+                    if val == -9999 or val == "NaN":
+                        val = "NA"
+                    # round
+                    try: dout["info"][db_id][DDESCDRUGMAP[descMap]] = round(float(val),1)
+                    except: dout["info"][db_id][DDESCDRUGMAP[descMap]] = val
                 else:
-                    try: dout["info"][db_id][DDESCDSSTOX[descMap]] = round(float(lprop[self.lallProp.index(descMap)]),1)
-                    except: dout["info"][db_id][DDESCDSSTOX[descMap]] = lprop[self.lallProp.index(descMap)]
+                    if descMap in self.lallProp:
+                        if lprop == None or lprop == []:
+                            val = "NA"
+                        else:
+                            val = lprop[self.lallProp.index(descMap)]
+                    elif descMap in self.lPropTox:
+                        if lprop_tox == None:
+                            val = "NA"
+                        else:
+                            val = lprop_tox[self.lPropTox.index(descMap)]
+                    else:
+                        val = "NA"
+                    
+                    if val == -9999 or val == "NaN":
+                        val = "NA"
+                    # round
+                    try: dout["info"][db_id][DDESCDSSTOX[descMap]] = round(float(val),1)
+                    except: dout["info"][db_id][DDESCDSSTOX[descMap]] = val
+ 
 
             #SMILES
             dout["SMILESClass"][db_id] = {}
             dout["SMILESClass"][db_id]["inchikey"] = inch
             dout["SMILESClass"][db_id]["SMILES"] = smiles
-            try:
-                dout["SMILESClass"][db_id]["GHS_category"] = lprop[self.lallProp.index("GHS_category")]
-            except:
-                dout["SMILESClass"][db_id]["DRUG_GROUPS"] = lprop[self.lallProp.index("DRUG_GROUPS")]
+
+
+            if self.map == "drugbank":
+                if lprop_tox == None:
+                     dout["SMILESClass"][db_id]["DRUG_GROUPS"] =  "NA"
+                else:
+                    dout["SMILESClass"][db_id]["DRUG_GROUPS"] = lprop_tox[self.lPropTox.index("DRUG_GROUPS")]
+            else:
+                if lprop_tox == None:
+                    dout["SMILESClass"][db_id]["GHS_category"] = "NA"
+                else:
+                    dout["SMILESClass"][db_id]["GHS_category"] = lprop_tox[self.lPropTox.index("GHS_category")]
+                
 
             # neighbor
             dout["neighbor"][db_id] = {}

@@ -10,8 +10,7 @@
 <link href="https://sandbox.ntp.niehs.nih.gov/static/css/ntpweb.css"
           rel="stylesheet" type="text/css"/> 
 
-<link href="https://sandbox.ntp.niehs.nih.gov/bodymap/static/css/theme.css" rel="stylesheet"> 
-<!--<link href="/static/bodymap/css/theme.css" rel="stylesheet">-->
+<link href="{% static 'bodymap/css/theme.css' %}" rel="stylesheet"> 
 
 {% endblock %}
 {% block title %} Help bodymap{% endblock %}
@@ -26,8 +25,8 @@
 
 <div class="row">
     <div class="column">
-            <a href="https://sandbox.ntp.niehs.nih.gov/bodymap/static/img/help_1.png">
-                <img src="https://sandbox.ntp.niehs.nih.gov/bodymap/static/img/help_1.png" style="width:70%" alt="Example of chemical selection by name or by CASRN">
+            <a href="{% static 'bodymap/img/help_1.png' %}">
+                <img src="{% static 'bodymap/img/help_1.png' %}" style="width:70%" alt="Example of chemical selection by name or by CASRN">
             </a>
     </div>
 </div>
@@ -37,13 +36,14 @@
     Chemical information is linked to the <a class = "aurl" href="https://comptox.epa.gov/dashboard">EPA chemical dashboard</a>
      where the user can access a full chemical description and additional detailed data. 
      In addition user can link the selected chemical to <a class = "aurl" href="https://sandbox.ntp.niehs.nih.gov/chemmaps/">chemmaps.com</a>
-      and <a class = "aurl" href="http://134.129.166.26:8080/tox21enricher/">Tox21 enricher</a>, two National Toxicology Program (NTP) tools allowing user to explore the chemical structural space and further analyze assay results.
+      and <a class = "aurl" href="http://134.129.166.26:8080/tox21enricher/">Tox21 enricher</a>, two National Toxicology Program (NTP) tools allowing user to explore the chemical structural space and further analyze assay results.<br>
+      Chemical quality control (QC) information from Tox21 efforts is obtained from different sources for assays run through the ToxCast program and NCATS. Tox21BodyMap extracts that information from the <a class = "aurl" href="https://ice.ntp.niehs.nih.gov/DATASETDESCRIPTION">NTP-ICE webserver.</a> 
 </p>
 
 <div class="row">
     <div class="column">
-            <a href="https://sandbox.ntp.niehs.nih.gov/bodymap/static/img/help_2.png">
-                <img src="https://sandbox.ntp.niehs.nih.gov/bodymap/static/img/help_2.png" style="width:100%" alt="Bisphenol A example of chemical information">
+            <a href="{% static 'bodymap/img/help_2.png' %}">
+                <img src="{% static 'bodymap/img/help_2.png' %}" style="width:100%" alt="Bisphenol A example of chemical information">
             </a>
     </div>
 </div>
@@ -57,15 +57,15 @@
         <li style="font-size: 20px;">using assay gene target</li>
         <li style="font-size: 20px;">using assay tissue (where specific gene targets were not available).</li>
     </ul></p>
-    <p>The preliminary <a href="https://sandbox.ntp.niehs.nih.gov/bodymap/static/mapping/preMapping.csv">assay tissue mapping is available for download.</a>
+    <p>The preliminary <a class = "aurl" href="{% static 'bodymap/mapping/preMapping.csv' %}">assay tissue mapping is available for download.</a>
     The type of mapping is represented in green for the assays gene target mapping and in blue for the assay tissue mapping, 
     where the assay cell type dictated the target organ mapping in lieu of a specific gene target.
 </p>
 
 <div class="row">
     <div class="column">
-            <a href="https://sandbox.ntp.niehs.nih.gov/bodymap/static/img/help_3.png">
-                <img src="https://sandbox.ntp.niehs.nih.gov/bodymap/static/img/help_3.png" style="width:100%" alt="Example of Bisphenol A body mapping">
+            <a href="{% static 'bodymap/img/help_3.png' %}">
+                <img src="{% static 'bodymap/img/help_3.png' %}" style="width:100%" alt="Example of Bisphenol A body mapping">
             </a>
     </div>
 </div>
@@ -84,14 +84,14 @@ This part includes also a browsable, downloadable table with all mapped data use
 
 <div class="row">
     <div class="column">
-            <a href="https://sandbox.ntp.niehs.nih.gov/bodymap/static/img/help_4.png">
-                <img src="https://sandbox.ntp.niehs.nih.gov/bodymap/static/img/help_4.png" style="width:100%" alt="Example of Bisphenol A assay results">
+            <a href="{% static 'bodymap/img/help_4.png' %}">
+                <img src="{% static 'bodymap/img/help_4.png' %}" style="width:100%" alt="Example of Bisphenol A assay results">
             </a>
     </div>
 </div>
 
 <p>
-    Graphs and tables are represented using the JS libraries <a href="https://plot.ly/javascript/">plotly</a> and <a href="https://github.com/ag-grid/ag-grid">ag-grid.</a>
+    Graphs and tables are represented using the JS libraries <a class = "aurl" href="https://plot.ly/javascript/">plotly</a> and <a class = "aurl" href="https://github.com/ag-grid/ag-grid">ag-grid.</a>
 </p>
 
 <br>
@@ -102,12 +102,12 @@ This part includes also a browsable, downloadable table with all mapped data use
 
 <div class="row">
     <div class="column">
-            <a href="https://sandbox.ntp.niehs.nih.gov/bodymap/static/img/help_5.png">
-                <img src="https://sandbox.ntp.niehs.nih.gov/bodymap/static/img/help_5.png" style="width:100%" alt="Example of Bisphenol A network representation">
+            <a href="{% static 'bodymap/img/help_5.png' %}">
+                <img src="{% static 'bodymap/img/help_5.png' %}" style="width:100%" alt="Example of Bisphenol A network representation">
             </a>
     </div>
 </div>
 
-<p>Networks are represented using the library <a href="https://visjs.org/">vis.js.</a></p>
+<p>Networks are represented using the library <a class = "aurl" href="https://visjs.org/">vis.js.</a></p>
 
 {% endblock content %}

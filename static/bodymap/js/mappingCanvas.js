@@ -54,22 +54,24 @@ function calibratePosition(){
 function defineDictOrgan(dmap, valAC50, valExp){
 
     var dout = {};
-
     for(assay in dmap){
         for(system in dmap[assay]){
             for(organ in dmap[assay][system]){
                 if(!(organ in dout)){
                     dout[organ] = "No";
-                }
-                if(dout[organ] == "Draw-green" || dout[organ] == "Draw-blue"){
                     continue;
                 }
-
+                if(dout[organ] == "Draw-cyan"){
+                    continue;
+                }
                 if(dmap[assay][system][organ]["AC50"] <= valAC50){
                     if(dmap[assay][system][organ]["gene"][0] == "NA"){
                         dout[organ] = "Draw-blue";
                     }else{
-                        if (dmap[assay][system][organ]["exp"][0] >= valExp){
+                        if (dmap[assay][system][organ]["exp"][0] >= valExp && dout[organ] == "Draw-blue"){
+                            dout[organ] = "Draw-cyan";
+                        }
+                        else if (dmap[assay][system][organ]["exp"][0] >= valExp && dout[organ] != "Draw-blue"){
                             dout[organ] = "Draw-green";
                         }
                     }
@@ -119,6 +121,7 @@ function mapOnBody(dmap, valAC50, valExp){
     //console.log(valAC50);
     //console.log(valExp);
     var lorgani="";
+    ctx.drawImage(background,0,0);
     for(var organ in dorgan){
         if(dorgan[organ] == "Draw-green"){
             ctx.fillStyle = "#1ee844";
@@ -138,13 +141,17 @@ function mapOnBody(dmap, valAC50, valExp){
             }catch{
                 continue;
             }
-        }else{
+        }else if(dorgan[organ] == "Draw-cyan"){
+            ctx.fillStyle = "#2bfafa";
             try {ctx.beginPath();
-            ctx.clearRect(dmappingBody[organ][0] - 7 - 1, dmappingBody[organ][1] - 7 - 1, 7 * 2 + 2, 7 * 2 + 2);
-            ctx.closePath();
+                ctx.arc(dmappingBody[organ][0], dmappingBody[organ][1], 7, 0, 2 * Math.PI);
+                ctx.fill();
+                lorgani = lorgani + organ + "; ";
             }catch{
                 continue;
             }
+        }else{
+
         }
     }
 

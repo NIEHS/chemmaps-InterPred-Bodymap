@@ -18,8 +18,7 @@ class bodypartChoice(forms.Form):
                ("Visual System", "Visual System"))
             
 
-    bodypart = forms.MultipleChoiceField(choices=CHOICES, widget=forms.CheckboxSelectMultiple(attrs={
-                       "class": "column-checkbox"}), required=True)
+    bodypart = forms.MultipleChoiceField(choices=CHOICES, widget=forms.CheckboxSelectMultiple(), required=True)
 
 
     fold = forms.CharField(label="", error_messages={'required': ''}, required=True)
@@ -33,24 +32,25 @@ class bodypartChoice(forms.Form):
 
 class CASUpload(forms.Form):
 
+    CHOICES = (("gene", "Gene expression cutoff based on median expression by gene for all organs"), ("organ", "Gene expression cutoff based on organ median expression for all genes"))
+
     # extract list of available chemical from DB
     cDB = DBrequest(verbose=0)
-    lname = cDB.execCMD("SELECT casn, name from mvwchemmap_bodymapcase_name")
-    lcas = cDB.execCMD("SELECT casn, casn from mvwchemmap_bodymapcase_name where casn is not NULL ORDER BY casn")
-    
-    #for CAS in lCAS:
-    #    print(CAS)
+    lname = cDB.execCMD("SELECT DISTINCT casn, name from bodymap_chemsum WHERE name is not NULL ORDER BY name")
+    lcas = cDB.execCMD("SELECT DISTINCT casn, casn from bodymap_chemsum WHERE casn is not NULL ORDER BY casn")
 
+    lcas.insert(0, ("---", "---"))
+    lname.insert(0, ("---", "---"))
     name = forms.CharField(label='name', widget=forms.Select(choices=lname))
     cas = forms.CharField(label='cas', widget=forms.Select(choices=lcas))
     #chem = forms.CharField(label="", error_messages={'required': ''}, required=True, )
+    exp = forms.CharField(label='expression', widget=forms.RadioSelect(choices=CHOICES), initial="gene", required=True)
 
-    def clean_name(self):
-        return str(self.data['name'])
+
+
+    def clean_upload(self):
+        return [str(self.data['name']), str(self.data['cas']), str(self.data['exp'])]
     
-    def clean_CAS(self):
-        return str(self.data['cas'])
-
 
 
 
