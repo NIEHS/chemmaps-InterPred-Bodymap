@@ -1,10 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 {% block extra-css %}
-<link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
-    type="text/css">
-<link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
-    type="text/css">
+<link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
 <link href="https://sandbox.ntp.niehs.nih.gov/static/css/ntpweb-shared.css" rel="stylesheet" type="text/css" />
 <link href="https://sandbox.ntp.niehs.nih.gov/static/css/base.css" rel="stylesheet" type="text/css" />
 <link href="https://sandbox.ntp.niehs.nih.gov/static/css/ntpweb.css" rel="stylesheet" type="text/css" />
@@ -132,12 +130,8 @@
     <br>
     <h4>Contact us</h4>
     <p><a a class="aurl" style="color: #232b5f" href="mailto:chemmaps@mail.nih.gov"> chemmaps@mail.nih.gov</a><br>
-        <a a class="aurl" style="color: #232b5f" href="https://twitter.com/SpaceChemMaps">
-            <i class="fa fa-twitter fa-fw"></i>
-            <span class="network-name">@SpaceChemMaps</span>
-        </a>
     </p>
-    <div style="text-align: left;"><i>Last update: 20/05/2021</i></div>
+    <div style="text-align: left;"><i>Last update: 12/2022</i></div>
 </div>
 
 {% endblock content %}

@@ -1,14 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
 {% block extra-css %}
-<link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css">
-<link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-<link href="https://sandbox.ntp.niehs.nih.gov/static/css/ntpweb-shared.css"
-rel="stylesheet" type="text/css"/> 
-<link href="https://sandbox.ntp.niehs.nih.gov/static/css/base.css"
-rel="stylesheet" type="text/css"/>
-<link href="https://sandbox.ntp.niehs.nih.gov/static/css/ntpweb.css"
-rel="stylesheet" type="text/css"/> 
+<link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
+<link href="https://sandbox.ntp.niehs.nih.gov/static/css/ntpweb-shared.css" rel="stylesheet" type="text/css" />
+<link href="https://sandbox.ntp.niehs.nih.gov/static/css/base.css" rel="stylesheet" type="text/css" />
+<link href="https://sandbox.ntp.niehs.nih.gov/static/css/ntpweb.css" rel="stylesheet" type="text/css" />
+
 <link href="{% static 'chemmaps/css/theme.css' %}" rel="stylesheet">
 {% endblock %}
 {% block content %}
@@ -237,7 +235,8 @@ rel="stylesheet" type="text/css"/>
             <p align="left">A user can personalize each map with up to five precomputed chemicals properties. 
                 Chemicals on the map will be represented using their properties that user can interactively change. 
                 A user is allowed to project on a map their own chemicals. ChemMaps.com can compute on the fly coordinates of each new chemical. 
-                All results are downloadable including 2D and 3D molecular descriptors computed on the fly.</p>
+                All results are downloadable including 2D and 3D molecular descriptors computed on the fly using RDKIT (v.2022.03.4) and 
+                physico-chemical properties computed using OPERA (v.2.7).</p>
         </div>
         <div class="columnhelp left">
             <div class="slideshow-container">
