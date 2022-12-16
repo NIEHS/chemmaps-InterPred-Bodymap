@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-from pickle import TRUE
 
 # project path origin
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
