@@ -26,9 +26,10 @@ def help(request):
     })
 
 @csrf_exempt 
-def uploadSMILES(request):
+def uploadSMILES(request, *args, **kwargs):
 
     name_session = request.session.get("name_session")
+    print(name_session)
 
     if request.method == 'GET':
         form_smiles = UploadChemList()
@@ -49,7 +50,7 @@ def uploadSMILES(request):
             return render(request, 'interferences/uploadSMILES.html', {"form_smiles":form_smiles,
                                                            "from_upload": formUpload, "ErrorLine": "1"})
 
-        prSession = path.abspath("./temp") + "/" + str(name_session) + "/"
+        prSession = path.abspath(path.dirname(__file__) + "/../temp") + "/" + str(name_session) + "/"
         createFolder(prSession, 1)
 
         cinput = formatSMILES(content, prSession)
@@ -62,7 +63,7 @@ def uploadSMILES(request):
 
     elif formUpload.is_valid() == True:
 
-        prSession = path.abspath("./temp") + "/" + str(name_session) + "/"
+        prSession = path.abspath(path.dirname(__file__) + "/../temp") + "/" + str(name_session) + "/"
         createFolder(prSession, 1)
 
         pfileserver = prSession + "upload.txt"
@@ -102,7 +103,7 @@ def computeDesc(request):
     name_session = request.session.get("name_session")
 
     # open file with
-    prsession = path.abspath("./temp") + "/" + str(name_session) + "/"
+    prsession = path.abspath(path.dirname(__file__) + "/../temp") + "/" + str(name_session) + "/"
     dSMI = loadMatrixToDict(prsession + "smiClean.csv", sep="\t")
 
     cinput = formatSMILES(dSMI, prsession)
