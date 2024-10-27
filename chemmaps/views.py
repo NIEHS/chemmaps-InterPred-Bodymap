@@ -387,11 +387,6 @@ def computeDescriptor(request, map):
             mapJS = json.dumps(map)
 
         
-        print(len(list(dJS["coord"].keys())))
-        print(len(list(dJS["info"].keys())))
-        print(len(list(dJS["neighbor"].keys())))
-        print(len(list(dJS["SMILESClass"].keys())))
-        print(len(ldesc))
         return render(request, 'chemmaps/Map3D.html', {"dcoord": dcoord, "dinfo": dinfo, "dneighbor": dneighbor,
                                                            "dSMILESClass": dSMILESClass, "ldesc": ldesc,
                                                             "map": map, "mapJS": mapJS, "prSessionJS":prSessionJS,
