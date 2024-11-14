@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.core.files.storage import default_storage
 from django.template import RequestContext
+from django.views.decorators.csrf import csrf_exempt
 from random import randint
 import json
 from re import search
@@ -52,6 +53,7 @@ def download(request, name):
             return response
     raise Http404
 
+@csrf_exempt 
 def launchMap(request, map, *args, **kwargs):
 
     name_session = request.session.get("name_session")
@@ -155,10 +157,12 @@ def launchMap(request, map, *args, **kwargs):
                     build.err = 1
                 else:
                     build.loadChemMapCenterChem(chemIn, center = 1, nbChem = 10000)
+                
                 if build.err == 1:
                     reponse = render(request, 'chemmaps/launchMap.html', {"form_info": formDesc, "form_smiles": form_smiles,
                                                                     "from_upload": formUpload, "Error": "0", "map": map,
                                                                     "ErrorDSSTox":"1", "dassays":d_assays})
+                    return reponse
                 dcoord = json.dumps(build.coord)
                 dinfo = json.dumps(build.dinfo)
                 dneighbor = json.dumps(build.dneighbor)
@@ -190,6 +194,7 @@ def launchMap(request, map, *args, **kwargs):
                                                            "from_upload": formUpload, "Error": "0", "map":map, "dassays":d_assays})
     return reponse
 
+@csrf_exempt
 def launchTox21AssayMap(request, assay):
 
     cloadAssays = loadTox21AssayMap(assay)
@@ -237,7 +242,7 @@ def launchTox21TagetMap(request, target):
     return render(request, 'chemmaps/Map3D.html', {"dcoord": dcoord, "dinfo": dinfo, "dneighbor": dneighbor,
                                                              "dSMILESClass":dSMILESClass,
                                                              "ldesc":ldescJS, "map":"Tox21Target", "mapJS": mapJS, "prSessionJS":prSessionJS, "target":target, "assay":"", "nb_assays": cloadAssays.nb_assays})#, "nb_active": cloadAssays.nb_active, "nb_tested":  cloadAssays.nb_tested })
-
+@csrf_exempt
 def launchTox21MostPotent(request):
 
 
@@ -261,7 +266,7 @@ def launchTox21MostPotent(request):
     return render(request, 'chemmaps/Map3D.html', {"dcoord": dcoord, "dinfo": dinfo, "dneighbor": dneighbor,
                                                              "dSMILESClass":dSMILESClass,
                                                              "ldesc":ldescJS, "map":"Tox21Target", "mapJS": mapJS, "prSessionJS":prSessionJS, "target":"Most active", "assay":"", "nb_assays": cloadAssays.nb_assays})#, "nb_active": cloadAssays.nb_active, "nb_tested":  cloadAssays.nb_tested })
-
+@csrf_exempt
 def browseChemicals(request):
 
     name_session = request.session.get("name_session")
@@ -302,6 +307,7 @@ def launchDSSToxMap(request, DTXSID):
 
         return render(request, 'chemmaps/Map3D.html', {"dcoord": dcoord, "dinfo": dinfo, "dneighbor": dneighbor, "dSMILESClass":dSMILESClass, "ldesc":ldescJS, "map":"dsstox", "mapJS": mapJS,"prSessionJS":prSessionJS, "center_map":DTXSID, "assay":"" })
 
+@csrf_exempt 
 def computeDescriptor(request, map):
 
 
@@ -381,11 +387,6 @@ def computeDescriptor(request, map):
             mapJS = json.dumps(map)
 
         
-        print(len(list(dJS["coord"].keys())))
-        print(len(list(dJS["info"].keys())))
-        print(len(list(dJS["neighbor"].keys())))
-        print(len(list(dJS["SMILESClass"].keys())))
-        print(len(ldesc))
         return render(request, 'chemmaps/Map3D.html', {"dcoord": dcoord, "dinfo": dinfo, "dneighbor": dneighbor,
                                                            "dSMILESClass": dSMILESClass, "ldesc": ldesc,
                                                             "map": map, "mapJS": mapJS, "prSessionJS":prSessionJS,

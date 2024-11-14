@@ -131,6 +131,8 @@ class formatSMILES:
         filout2D.write("ID\tSMILES\tinchikey\t" + "\t".join(ldesc1D2D) + "\n")
         filoutOPERA.write("ID\tSMILES\t" + "\t".join(ldescOPERA) + "\n")
 
+        print("HERE2")
+        print(self.dclean)
         for k in self.dclean["IN"].keys():
             dout[k] = {}
             SMICLEAN = self.dclean["OUT"][k]["SMILES"]
@@ -150,7 +152,7 @@ class formatSMILES:
                 
                 # check if chemical is in DB for 1D2D
                 lval1D2D_OPERA = downloadDescFromDB(self.cDB, ldesc1D2D, ldescOPERA, inch)
-                
+
                 # case of error in computation
                 if lval1D2D_OPERA == []:
                     dout[k]["desc"] = "checkNo.png"
@@ -243,6 +245,8 @@ def downloadDescFromDB(cDB, ldesc1D2D, ldescOPERA, inchikey):
     
     else:
         nb_userDB = cDB.execCMD("SELECT COUNT(*) FROM chemical_description_user WHERE inchikey='%s' AND status != 'update'"%(inchikey))[0][0]
+        print(nb_userDB)
+        print("SELECT COUNT(*) FROM chemical_description_user WHERE inchikey='%s' AND status != 'update'"%(inchikey))
         if nb_userDB > 0:
             lval1D2D = cDB.extractColoumn("chemical_description_user", "desc_1d2d","where inchikey='%s' and status != 'update' limit(1)"%(inchikey))
             lvalOPERA = cDB.extractColoumn("chemical_description_user", "desc_opera", "where inchikey='%s' and status != 'update' limit(1)"%(inchikey))
@@ -250,6 +254,7 @@ def downloadDescFromDB(cDB, ldesc1D2D, ldescOPERA, inchikey):
         else:
             return 0
 
+    # break if one descriptor error
     if lval1D2D == "ERROR" or lval1D2D == [] or lvalOPERA == "ERROR" or lvalOPERA == [] or lvalOPERA == [(None)]:
         return []
         

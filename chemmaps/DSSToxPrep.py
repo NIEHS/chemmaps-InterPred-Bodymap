@@ -187,7 +187,7 @@ class DSSToxPrep:
         if nbChemAdd == 1:
             center_map = 1
         else:
-            center_map =0
+            center_map = 0
 
 
         for chem in self.input["SMILESClass"].keys():
@@ -226,8 +226,10 @@ class DSSToxPrep:
                 else:
                     self.coord[chem] = deepcopy(self.input["coord"][chem])
                 self.dinfo[chem] = {}
-                for desc in self.input["info"][chem]:
-                    self.dinfo[chem][DDESCDSSTOX[desc]] = self.input["info"][chem][desc]
+                
+
+                for desc in list(self.input["info"][chem].keys()):
+                    self.dinfo[chem][desc] = self.input["info"][chem][desc]
                 self.dneighbor[chem] = deepcopy(self.input["neighbor"][chem])
                 self.dSMILES[chem] = {}
                 self.dSMILES[chem]["SMILES"] = deepcopy(self.input["SMILESClass"][chem]["SMILES"])

@@ -19,6 +19,10 @@ Development in python3.12 with
 - OPERA2.3_CL (https://github.com/kmansouri/OPERA/releases), fix the minor error in the install folder add a "/" at the path beginning
 - OPERA will install PADEL in the same folder
 
+## install OPERA --> install command line
+$sudo ./OPERA2.6_XXX_mcr.install -mode silent -agreeToLicense yes
+
+
 ## run the server
 $python manage makemigrations
 $python migrate

@@ -8,7 +8,10 @@ from .toolbox import loadMatrixToDict, formatModelName
 
 import subprocess
 
-PMODEL = path.abspath("./static/interferences/models") + "/"
+
+#PMODEL = path.abspath("./static/interferences/models") + "/"
+PMODEL = path.abspath(path.dirname(__file__) + "/../static/interferences/models/") + "/"
+
 
 
 class Predict:
@@ -18,6 +21,7 @@ class Predict:
         self.pdes2D = prSession + "2D.csv"
         self.pOpera = prSession + "OPERA.csv"
         self.prSession = prSession
+
         self.err = 0
         self.cDB = DBrequest()
         self.noDB = noDB
@@ -45,7 +49,6 @@ class Predict:
             
             if type(lpred) == list and lpred != []: 
                 #lpred = self.cDB.extractColoumn("interference_chemicals", "interference_prediction", "WHERE inchikey='%s'"%(inch))
-                print(lpred)
                 lpred = lpred[0]
                 if lpred[0] == None:
                     i = i + 1
@@ -111,14 +114,14 @@ class Predict:
     def predictRmodel(self, pmodel, pdesc2D, pOPERA, pout):
 
         if os.name == "nt":
-            pRpredict = path.abspath("./interferences/Rscripts") + "/predictfromModel.R"
+            pRpredict = path.abspath(path.dirname(__file__) + "/Rscripts") + "/predictfromModel.R"
             
             cmd = f'"C:\\Program Files\\R\\R-4.2.1\\bin\\Rscript.exe" "{pRpredict}" "{pdesc2D}" "{pOPERA}" "{pmodel}" "{pout}"'
             print(cmd)
             subprocess.run(cmd, shell=True, check=True)
 
         else:
-            pRpredict = path.abspath("./interferences/Rscripts") + "/predictfromModel.R"
+            pRpredict = path.abspath(path.dirname(__file__) + "/Rscripts") + "/predictfromModel.R"
             cmd = "%s %s %s %s %s" % (pRpredict, pdesc2D, pOPERA, pmodel, pout)
             print(cmd)
             system(cmd)
